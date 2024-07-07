@@ -12,7 +12,7 @@ class Spot
 
         Spot(std::time_t date, double price);
 
-        Spot(std::string, double price);
+        Spot(std::string date, double price);
 
         ~Spot();
 

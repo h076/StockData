@@ -10,9 +10,13 @@ class Ticker
 
         ~Ticker();
 
+        void getCurrentSpot();
+
+        void printCurrentSpot();
+
     private:
-        std::string symbol;
-        std::vector<Spot> spots;
+        std::string m_sSymbol;
+        std::vector<Spot> m_oSpots;
 };
 
 #endif // TICKER_H_
