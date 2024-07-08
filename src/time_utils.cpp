@@ -28,7 +28,7 @@ std::time_t dateToEpoch(const char* date) {
     memset(&t, 0, sizeof(t));
 
     t.tm_year = atoi(year) - 1900;
-    t.tm_mon = atoi(month);
+    t.tm_mon = atoi(month) - 1;
     t.tm_mday = atoi(day);
     t.tm_hour = atoi(hour);
     t.tm_min = atoi(minute);

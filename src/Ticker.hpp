@@ -10,13 +10,18 @@ class Ticker
 
         ~Ticker();
 
-        void getCurrentSpot();
+        void loadAPIKey();
 
-        void printCurrentSpot();
+        void loadHistoricalSpots(std::string from, std::string to);
+
+        void loadHistoricalSpots(std::time_t from, std::time_t to);
+
+        void displaySpots();
 
     private:
         std::string m_sSymbol;
-        std::vector<Spot> m_oSpots;
+        std::vector<Spot*> m_oSpots;
+        std::string m_sAPIKey;
 };
 
 #endif // TICKER_H_
