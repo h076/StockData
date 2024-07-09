@@ -24,6 +24,7 @@ void Ticker::loadHistoricalSpots(std::string from, std::string to) {
 }
 
 void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to) {
-    std::cout << "from : " << from << std::endl;
-    std::cout << "to : " << to << std::endl;
+
+    Storage * returnData = downloadHistoricalData(m_sSymbol, from, to, "month", m_sAPIKey);
+    std::cout << returnData->memory << std::endl;
 }

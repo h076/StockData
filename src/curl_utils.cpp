@@ -1,4 +1,5 @@
 #include "curl_utils.hpp"
+#include <cstring>
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <sstream>
@@ -13,6 +14,7 @@ static size_t write_callback(char *contents, size_t size, size_t nmemb, void *us
         return 0;
 
     mem->memory = ptr;
+    memcpy(mem->memory + mem->size, contents, realsize);
     mem->size += realsize;
 
     // zero terminate end of memory
@@ -32,11 +34,11 @@ Storage * downloadHistoricalData(std::string symbol,
      * https://api.polygon.io/v2/aggs/ticker/AAPL/range/1/month/2023-01-09/1720209601000000?adjusted=true&sort=asc&apiKey=U1s5uQq9FLg4f6IyYpMF8zj4_YZOaYyn
      */
 
-    // add 4 0's to each time_t to make them microsecond timestamps
+    // add 3 0's to each time_t to make them millisecond timestamps
     std::stringstream sst1;
-    sst1 << from << "0000";
+    sst1 << from << "000";
     std::stringstream sst2;
-    sst2 << to << "0000";
+    sst2 << to << "000";
     // temporarily this woudl only return in monthluy intervals
     std::string url = "https://api.polygon.io/v2/aggs/ticker/"
         + symbol

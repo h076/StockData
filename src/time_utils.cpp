@@ -5,6 +5,7 @@ std::time_t currentEpoch() {
     return std::time(NULL);
 }
 
+// date format YYYY-MM-DD
 std::time_t dateToEpoch(const char* date) {
     char year[5] = {'\0'};
     std::strncpy(year, date, 4);
@@ -15,24 +16,12 @@ std::time_t dateToEpoch(const char* date) {
     char day[3] = {'\0'};
     std::strncpy(day, date + 8, 2);
 
-    char hour[3] = {'\0'};
-    std::strncpy(hour, date + 11, 2);
-
-    char minute[3] = {'\0'};
-    std::strncpy(minute, date + 13, 2);
-
-    char second[3] = {'\0'};
-    std::strncpy(second, date + 15, 2);
-
     struct std::tm t;
     memset(&t, 0, sizeof(t));
 
     t.tm_year = atoi(year) - 1900;
     t.tm_mon = atoi(month) - 1;
     t.tm_mday = atoi(day);
-    t.tm_hour = atoi(hour);
-    t.tm_min = atoi(minute);
-    t.tm_sec = atoi(second);
 
     time_t epoch = mktime(&t);
     return epoch;
