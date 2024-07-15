@@ -56,10 +56,10 @@ std::string Spot::toString() {
     std::stringstream sClose;
     sClose << m_dClose;
     return "{date: " + this->getDateToString()
-        + "Low : " + sLow.str()
-        + "High : " + sHigh.str()
-        + "Open : " + sOpen.str()
-        + "Close :" + sClose.str() + "}";
+        + ", Low : " + sLow.str()
+        + ", High : " + sHigh.str()
+        + ", Open : " + sOpen.str()
+        + ", Close : " + sClose.str() + "}";
 }
 
 void Spot::printSpot() {

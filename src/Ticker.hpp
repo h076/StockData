@@ -20,7 +20,7 @@ class Ticker
 
     private:
         std::string m_sSymbol;
-        std::vector<Spot*> m_oSpots;
+        std::vector<Spot *> m_oSpots;
         std::string m_sAPIKey;
 };
 

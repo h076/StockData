@@ -49,8 +49,6 @@ Storage * downloadHistoricalData(std::string symbol,
         + "?adjusted=true&sort=asc&apiKey="
         + APIkey;
 
-    std::cout << url << "\n";
-
     CURL * curl = curl_easy_init();
     CURLcode res;
 
