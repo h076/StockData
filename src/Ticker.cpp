@@ -6,6 +6,7 @@
 Ticker::Ticker(std::string symbol) {
     m_sSymbol = symbol;
     loadAPIKey();
+    setInterval(MONTH);
 }
 
 void Ticker::loadAPIKey() {
@@ -25,7 +26,7 @@ void Ticker::loadHistoricalSpots(std::string from, std::string to) {
 
 void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to) {
 
-    Storage * returnData = downloadHistoricalData(m_sSymbol, from, to, "month", m_sAPIKey);
+    Storage * returnData = downloadHistoricalData(m_sSymbol, from, to, m_sInterval, m_sAPIKey);
 
     char * memPtr = returnData->memory;
     while(*memPtr != '[') {
@@ -89,6 +90,29 @@ void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to) {
         }else if(currentChar == '}') {
             m_oSpots.push_back(new Spot(time, atof(openBuffer), atof(highBuffer), atof(lowBuffer), atof(closeBuffer)));
         }
+    }
+}
+
+void Ticker::setInterval(Interval interval) {
+    switch(interval) {
+        case MINUTE:
+            m_sInterval = "minute";
+            break;
+        case HOUR:
+            m_sInterval = "hour";
+            break;
+        case DAY:
+            m_sInterval = "day";
+            break;
+        case MONTH:
+            m_sInterval = "month";
+            break;
+        case YEAR:
+            m_sInterval = "year";
+            break;
+        default:
+            m_sInterval = "month";
+            break;
     }
 }
 

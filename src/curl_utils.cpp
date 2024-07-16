@@ -37,12 +37,16 @@ Storage * downloadHistoricalData(std::string symbol,
     // add 3 0's to each time_t to make them millisecond timestamps
     std::stringstream sst1;
     sst1 << from << "000";
+
     std::stringstream sst2;
     sst2 << to << "000";
+
     // temporarily this woudl only return in monthluy intervals
     std::string url = "https://api.polygon.io/v2/aggs/ticker/"
         + symbol
-        + "/range/1/month/"
+        + "/range/1/"
+        + interval
+        + "/"
         + sst1.str()
         + "/"
         + sst2.str()

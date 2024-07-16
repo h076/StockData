@@ -3,6 +3,8 @@
 
 #include "Spot.hpp"
 
+enum Interval {MINUTE, HOUR, DAY, MONTH, YEAR};
+
 class Ticker
 {
     public:
@@ -16,12 +18,15 @@ class Ticker
 
         void loadHistoricalSpots(std::time_t from, std::time_t to);
 
+        void setInterval(Interval interval);
+
         void displaySpots();
 
     private:
         std::string m_sSymbol;
         std::vector<Spot *> m_oSpots;
         std::string m_sAPIKey;
+        std::string m_sInterval;
 };
 
 #endif // TICKER_H_
