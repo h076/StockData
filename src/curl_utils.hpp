@@ -10,6 +10,12 @@
 struct Storage {
     char * memory;
     size_t size;
+
+    public:
+        ~Storage() {
+            if(memory != nullptr)
+                free(memory);
+        }
 };
 
 

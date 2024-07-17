@@ -22,6 +22,8 @@ class Ticker
 
         void displaySpots();
 
+        void clearSpots();
+
     private:
         std::string m_sSymbol;
         std::vector<Spot *> m_oSpots;

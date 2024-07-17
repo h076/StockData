@@ -9,6 +9,10 @@ Ticker::Ticker(std::string symbol) {
     setInterval(MONTH);
 }
 
+Ticker::~Ticker() {
+    clearSpots();
+}
+
 void Ticker::loadAPIKey() {
     std::ifstream file ("APIkey.txt");
     if(file.is_open()) {
@@ -25,6 +29,9 @@ void Ticker::loadHistoricalSpots(std::string from, std::string to) {
 }
 
 void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to) {
+
+    if(m_oSpots.size() != 0)
+        clearSpots();
 
     Storage * returnData = downloadHistoricalData(m_sSymbol, from, to, m_sInterval, m_sAPIKey);
 
@@ -91,6 +98,8 @@ void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to) {
             m_oSpots.push_back(new Spot(time, atof(openBuffer), atof(highBuffer), atof(lowBuffer), atof(closeBuffer)));
         }
     }
+
+    delete returnData;
 }
 
 void Ticker::setInterval(Interval interval) {
@@ -117,7 +126,14 @@ void Ticker::setInterval(Interval interval) {
 }
 
 void Ticker::displaySpots() {
-    for(auto it = m_oSpots.begin(); it != m_oSpots.end(); it++) {
+    for(std::vector<Spot *>::iterator it = m_oSpots.begin(); it != m_oSpots.end(); it++) {
         (*it)->printSpot();
     }
+}
+
+void Ticker::clearSpots() {
+    for(std::vector<Spot *>::iterator it = m_oSpots.begin(); it != m_oSpots.end(); it++) {
+        free(*it);
+    }
+    m_oSpots.clear();
 }
