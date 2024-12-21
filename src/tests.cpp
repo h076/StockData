@@ -35,8 +35,11 @@ TEST_F(TickerTest, SetInterval) {
     EXPECT_EQ(ticker->getInterval(), "year");
 
     // Default case
-    ticker->setInterval(static_cast<Interval>(999)); // Invalid interval
-    EXPECT_EQ(ticker->getInterval(), "month"); // Default fallback
+    try {
+        ticker->setInterval(static_cast<Interval>(999)); // Invalid interval
+    }catch (const std::exception& e) {
+        EXPECT_EQ(ticker->getInterval(), "month"); // Default fallback
+    }
 }
 
 // Test clearSpots and clearSamples

@@ -4,6 +4,10 @@
 #include "time_utils.hpp"
 #include <__config>
 #include <cstdio>
+#include <spdlog/spdlog.h>
+#include <stdexcept>
+#include <time.h>
+
 
 Ticker::Ticker(std::string symbol) {
     m_sSymbol = symbol;
@@ -41,7 +45,7 @@ void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to) {
     char * memPtr = returnData->memory;
     char * endPtr = returnData->memory+(returnData->size - 1);
     if(memPtr == nullptr) {
-        std::cout << "No data retuned so no spots loaded ...\n";
+        spdlog::error("No data retuned so no spots loaded.");
         delete returnData;
         return;
     }
@@ -53,7 +57,7 @@ void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to) {
     memPtr++;
 
     if(memPtr >= endPtr) {
-        std::cout << "Invalid data format - no opening '[' found\n";
+        spdlog::error("Invalid data format - no opening '[' found");
         delete returnData;
         return;
     }
@@ -117,6 +121,8 @@ void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to) {
     }
 
     delete returnData;
+
+    spdlog::info("Loaded historical spots from {} to {}", ctime (&from), ctime (&to));
 }
 
 void Ticker::setInterval(Interval interval) {
@@ -138,8 +144,9 @@ void Ticker::setInterval(Interval interval) {
             break;
         default:
             m_sInterval = "month";
-            break;
+            throw Ticker::TickerException("Invalid interval, interval has been set to month.");
     }
+    spdlog::info("Interval set to {}", m_sInterval);
 }
 
 void Ticker::displaySpots() {
@@ -209,14 +216,24 @@ double * Ticker::getLowPriceArr(int * arrSize) {
 
 void Ticker::getPriceSamples(std::string from, std::string to, Interval interval,
                                       int sampleCount, int sampleLength, int trainSplit) {
-    setInterval(interval);
+    if(sampleLength < 48) {
+        spdlog::error("getPriceSamples: SampleLength of {} is not greater than or equal to 48\n", sampleLength);
+        return;
+    }
+
+    try {
+        setInterval(interval);
+    }catch (const std::exception& e) {
+        spdlog::error("setInterval: {}", e.what());
+        return;
+    }
+
     loadHistoricalSpots(from, to);
 
     m_oSamples.clear();
 
-    // for efficiency loop once in this function to get priceArrs
     if(m_oSpots.empty()) {
-        std::cout << "No spots to derive prices from...\n";
+        spdlog::error("getPriceSamples: No spots to derive prices from");
         return;
     }
 
@@ -259,6 +276,8 @@ void Ticker::getPriceSamples(std::string from, std::string to, Interval interval
     free(closeArr);
     free(highArr);
     free(lowArr);
+
+    spdlog::info("Loaded {} samples of length {} from {} to {}", sampleCount, sampleLength, from, to);
 }
 
 void Ticker::displaySamples() {
@@ -299,6 +318,11 @@ void Ticker::displaySamplesFeatures() {
 }
 
 void Ticker::saveSamplesCSV() {
+    if(m_oSamples.empty()) {
+        spdlog::error("No samples present, cannot save to csv.");
+        return;
+    }
+
     std::ofstream file;
     file.open("Samples.csv");
     file << m_oSamples[0]->toCSVHeader();

@@ -4,7 +4,7 @@
 #include "Spot.hpp"
 #include "Sample.hpp"
 
-enum Interval {MINUTE, HOUR, DAY, MONTH, YEAR};
+enum Interval {MINUTE, HOUR, DAY, MONTH, YEAR };
 
 class Ticker
 {
@@ -43,6 +43,12 @@ class Ticker
         void displaySamplesFeatures();
 
         void saveSamplesCSV();
+
+        class TickerException : public std::runtime_error {
+            public:
+                explicit TickerException(const std::string& message)
+                        : std::runtime_error(message) {}
+        };
 
     private:
         std::string m_sSymbol;

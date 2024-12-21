@@ -44,7 +44,7 @@ double Sample::getRSI() {
     int outNBElement;
     double * rsiOut = (double *) malloc(m_nSampleLength*sizeof(double));
 
-    // 14 is number of days to use to calculate RSI
+    // 14 is number of intervals to use to calculate RSI
     TA_RSI(0, static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100)), m_dpSampleClose,
                   14, &outBegIdx, &outNBElement, rsiOut);
 
