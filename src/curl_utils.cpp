@@ -3,6 +3,7 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <sstream>
+#include <spdlog/spdlog.h>
 
 static size_t write_callback(char *contents, size_t size, size_t nmemb, void *userdata) {
 
@@ -28,7 +29,8 @@ Storage * downloadHistoricalData(std::string symbol,
                          std::time_t from,
                          std::time_t to,
                          std::string interval,
-                         std::string APIkey) {
+                         std::string APIkey,
+                         int multiplier) {
     /**
      * example url :
      * https://api.polygon.io/v2/aggs/ticker/AAPL/range/1/month/2023-01-09/1720209601000000?adjusted=true&sort=asc&apiKey=U1s5uQq9FLg4f6IyYpMF8zj4_YZOaYyn
@@ -44,7 +46,9 @@ Storage * downloadHistoricalData(std::string symbol,
     // temporarily this woudl only return in monthluy intervals
     std::string url = "https://api.polygon.io/v2/aggs/ticker/"
         + symbol
-        + "/range/1/"
+        + "/range/"
+        + std::to_string(multiplier)
+        +"/"
         + interval
         + "/"
         + sst1.str()

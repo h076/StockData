@@ -23,6 +23,9 @@ class Ticker
         void setInterval(Interval interval);
         std::string getInterval() const {return m_sInterval;}
 
+        void setMultiplier(int m);
+        int getMultiplier() const {return m_nMultiplier;}
+
         void displaySpots();
 
         void clearSpots();
@@ -56,6 +59,7 @@ class Ticker
         std::string m_sAPIKey;
         std::string m_sInterval;
         std::vector<Sample *> m_oSamples;
+        int m_nMultiplier;
 };
 
 #endif // TICKER_H_

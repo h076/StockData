@@ -13,6 +13,7 @@ Ticker::Ticker(std::string symbol) {
     m_sSymbol = symbol;
     loadAPIKey();
     setInterval(MONTH);
+    setMultiplier(1);
 }
 
 Ticker::~Ticker() {
@@ -40,7 +41,7 @@ void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to) {
     if(m_oSpots.size() != 0)
         clearSpots();
 
-    Storage * returnData = downloadHistoricalData(m_sSymbol, from, to, m_sInterval, m_sAPIKey);
+    Storage * returnData = downloadHistoricalData(m_sSymbol, from, to, m_sInterval, m_sAPIKey, getMultiplier());
 
     char * memPtr = returnData->memory;
     char * endPtr = returnData->memory+(returnData->size - 1);
@@ -147,6 +148,15 @@ void Ticker::setInterval(Interval interval) {
             throw Ticker::TickerException("Invalid interval, interval has been set to month.");
     }
     spdlog::info("Interval set to {}", m_sInterval);
+}
+
+void Ticker::setMultiplier(int m) {
+    if(m > 60 || m < 1) {
+        spdlog::error("Invalid interval multiplier");
+        return;
+    }
+    m_nMultiplier = m;
+    spdlog::info("Interval multiplier set to {}", m);
 }
 
 void Ticker::displaySpots() {

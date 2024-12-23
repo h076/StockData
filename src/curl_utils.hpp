@@ -22,6 +22,6 @@ struct Storage {
 static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata);
 
 Storage * downloadHistoricalData(std::string symbol, std::time_t from, std::time_t to,
-                                 std::string interval, std::string APIkey);
+                                 std::string interval, std::string APIkey, int multiplier = 1);
 
 #endif // CURL_UTILS_H_
