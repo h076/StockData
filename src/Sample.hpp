@@ -61,7 +61,8 @@ class Sample
         double maxInRange(double * r);
 
         std::string toCSVLine();
-        std::string rangesToCSVLine();
+        std::string minRangeToCSV();
+        std::string maxRangeToCSV();
         const std::string toCSVHeader();
 
     private:

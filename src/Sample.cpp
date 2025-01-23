@@ -52,7 +52,7 @@ double Sample::getRSI() {
 }
 
 double * Sample::getRSIRange() {
-    double min = 0.0;
+    double min = 0;
     double max = 100;
     double * r = (double *) malloc(2*sizeof(double));
 
@@ -504,8 +504,8 @@ double Sample::getSampleY() {
 }
 
 double * Sample::getYRange() {
-    double min = -0.3;
-    double max = 0.3;
+    double min = -30.0;
+    double max = 30.0;
     double * r = (double *) malloc(2*sizeof(double));
 
     *r = min;
@@ -532,12 +532,14 @@ std::string Sample::toCSVLine() {
 
 }
 
-std::string Sample::rangesToCSVLine() {
-    auto b = std::bind(&Sample::getCloseRange, this);
-    std::string minLine = std::to_string(minInRange(getRSIRange())); + "," + std::to_string(minInRange(getMACDRange())) + "," + std::to_string(minInRange(getCloseRange())) + "," + std::to_string(minInRange(getStochFastKRange()))
+std::string Sample::minRangeToCSV() {
+    return std::to_string(minInRange(getRSIRange())) + "," + std::to_string(minInRange(getMACDRange())) + "," + std::to_string(minInRange(getCloseRange())) + "," + std::to_string(minInRange(getStochFastKRange()))
          + "," + std::to_string(minInRange(getStochFastDRange())) + "," + std::to_string(minInRange(getWilliamsRRange())) + "," + std::to_string(minInRange(getUltimateOscillatorRange()))
          + "," + std::to_string(minInRange(getTSFRange())) + "," + std::to_string(minInRange(getCCIRange())) + "," + std::to_string(minInRange(getYRange())) + "\n";
-    std::string maxLine = std::to_string(maxInRange(getRSIRange())) + "," + std::to_string(maxInRange(getMACDRange())) + "," + std::to_string(maxInRange(getCloseRange())) + "," + std::to_string(maxInRange(getStochFastKRange()))
+}
+
+std::string Sample::maxRangeToCSV() {
+    return std::to_string(maxInRange(getRSIRange())) + "," + std::to_string(maxInRange(getMACDRange())) + "," + std::to_string(maxInRange(getCloseRange())) + "," + std::to_string(maxInRange(getStochFastKRange()))
          + "," + std::to_string(maxInRange(getStochFastDRange())) + "," + std::to_string(maxInRange(getWilliamsRRange())) + "," + std::to_string(maxInRange(getUltimateOscillatorRange()))
          + "," + std::to_string(maxInRange(getTSFRange())) + "," + std::to_string(maxInRange(getCCIRange())) + "," + std::to_string(maxInRange(getYRange())) + "\n";
 }

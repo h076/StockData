@@ -7,9 +7,11 @@
 #include <spdlog/spdlog.h>
 #include <stdexcept>
 #include <time.h>
+#include <unordered_set>
 
 
 Ticker::Ticker(std::string symbol) {
+    spdlog::info ("Initialising {}", symbol);
     m_sSymbol = symbol;
     loadAPIKey();
     setInterval(MONTH);
@@ -59,6 +61,7 @@ void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to) {
 
     if(memPtr >= endPtr) {
         spdlog::error("Invalid data format - no opening '[' found");
+        spdlog::info ("data : {}", returnData->memory);
         delete returnData;
         return;
     }
@@ -238,6 +241,7 @@ void Ticker::getPriceSamples(std::string from, std::string to, Interval interval
         return;
     }
 
+
     loadHistoricalSpots(from, to);
 
     m_oSamples.clear();
@@ -260,9 +264,20 @@ void Ticker::getPriceSamples(std::string from, std::string to, Interval interval
 
     std::srand(time(0));
     std::vector<int> startPoints(sampleCount);
-    std::generate(startPoints.begin(), startPoints.end(), [&] () mutable {
-        return rand()%(arrSize-sampleLength-1);
-    });
+    //std::generate(startPoints.begin(), startPoints.end(), [&] () mutable {
+      //  return rand()%(arrSize-sampleLength-1);
+    //});
+
+    // generate points manually to ensure no repeating samples
+    std::unordered_set<int> startSeen;
+    int randStart;
+    for(auto it = startPoints.begin(); it != startPoints.end(); it++) {
+        randStart = rand()%(arrSize-sampleLength-1);
+        while(startSeen.count(randStart))
+            randStart = rand()%(arrSize-sampleLength-1);
+        startSeen.insert(randStart);
+        *it = randStart;
+    }
 
     // take samples from data
     int start;
@@ -287,7 +302,11 @@ void Ticker::getPriceSamples(std::string from, std::string to, Interval interval
     free(highArr);
     free(lowArr);
 
-    spdlog::info("Loaded {} samples of length {} from {} to {}", sampleCount, sampleLength, from, to);
+    std::time_t tFrom = dateToEpoch(from.c_str());
+    std::time_t tTo = dateToEpoch(to.c_str());
+
+    spdlog::info("Loaded {} samples of length {} from {} to {}",
+                 sampleCount, sampleLength, ctime(&tFrom), ctime(&tTo));
 }
 
 void Ticker::displaySamples() {
@@ -329,16 +348,40 @@ void Ticker::displaySamplesFeatures() {
 
 void Ticker::saveSamplesCSV() {
     if(m_oSamples.empty()) {
-        spdlog::error("No samples present, cannot save to csv.");
+        spdlog::error("Ticker::saveSamplesCSV : No samples present, cannot save to csv.");
         return;
     }
 
     std::ofstream file;
     file.open("Samples.csv");
     file << m_oSamples[0]->toCSVHeader();
+    file << m_oSamples[0]->minRangeToCSV();
+    file << m_oSamples[0]->maxRangeToCSV();
     for(auto & s : m_oSamples) {
         file << s->toCSVLine();
     }
     file.close();
     return;
+}
+
+void Ticker::saveSamplesTo(std::ofstream& file) {
+    if(m_oSamples.empty()) {
+        spdlog::error("Ticker::saveSamplesTo : No samples present, cannot save to csv.");
+        return;
+    }
+
+    if(!file.is_open()) {
+        file.open("Samples.csv");
+        file << m_oSamples[0]->toCSVHeader();
+        file << m_oSamples[0]->minRangeToCSV();
+        file << m_oSamples[0]->maxRangeToCSV();
+    }
+
+    if(file.is_open()) {
+        for(auto & s : m_oSamples) {
+            file << s->toCSVLine();
+        }
+    }else {
+        spdlog::error("Ticker::saveSamplesTo : File not opened, nothing saved");
+    }
 }
