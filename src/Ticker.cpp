@@ -364,10 +364,10 @@ void Ticker::saveSamplesCSV() {
     return;
 }
 
-void Ticker::saveSamplesTo(std::ofstream& file) {
+bool Ticker::saveSamplesTo(std::ofstream& file) {
     if(m_oSamples.empty()) {
         spdlog::error("Ticker::saveSamplesTo : No samples present, cannot save to csv.");
-        return;
+        return false;
     }
 
     if(!file.is_open()) {
@@ -384,4 +384,6 @@ void Ticker::saveSamplesTo(std::ofstream& file) {
     }else {
         spdlog::error("Ticker::saveSamplesTo : File not opened, nothing saved");
     }
+
+    return true;
 }

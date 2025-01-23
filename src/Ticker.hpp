@@ -46,7 +46,7 @@ class Ticker
         void displaySamplesFeatures();
 
         void saveSamplesCSV();
-        void saveSamplesTo(std::ofstream& file);
+        bool saveSamplesTo(std::ofstream& file);
 
         class TickerException : public std::runtime_error {
             public:

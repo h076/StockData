@@ -1,10 +1,12 @@
 #include "Ticker.hpp"
+#include <chrono>
 #include <spdlog/spdlog.h>
 #include <iostream>
 #include <fstream>
 #include <boost/tokenizer.hpp>
 #include <string>
 #include <unordered_set>
+#include <thread>
 
 int main() {
     std::ifstream tickTxt ("SP500Tickers.txt");
@@ -31,8 +33,12 @@ int main() {
 
     std::unordered_set<int> sampled;
     int strIdx;
+    int requests = 0;
 
-    for(int i=0; i<5; i++) {
+    for(int i=0; i<20; i++) {
+        if (requests > 0 && requests % 5 == 0) // then we wait 1 minute as polygon only allows 5 requests a minute
+            std::this_thread::sleep_for(std::chrono::minutes(1));
+
         strIdx = rand()%tickStr.size();
         while(sampled.find(strIdx) != sampled.end())
             strIdx = rand()%tickStr.size();
@@ -40,8 +46,16 @@ int main() {
 
         t = new Ticker(tickStr[strIdx]);
         t->setMultiplier(30);
-        t->getPriceSamples("2024-01-21", "2024-11-21", MINUTE, 126, 80);
-        t->saveSamplesTo(file);
+        t->getPriceSamples("2024-01-21", "2024-11-21", MINUTE, 32, 80);
+        requests++;
+
+        // if false the no samples have been loaded
+        if(!t->saveSamplesTo(file)) {
+            // remove ticker index from sampled as no samples saved
+            sampled.erase(strIdx);
+            i--;
+        }
+
         delete t;
     }
     file.close();
