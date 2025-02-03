@@ -3,12 +3,13 @@
 #include "curl_utils.hpp"
 #include "time_utils.hpp"
 #include <__config>
+#include <cstddef>
 #include <cstdio>
 #include <spdlog/spdlog.h>
 #include <stdexcept>
 #include <time.h>
 #include <unordered_set>
-
+#include <boost/tokenizer.hpp>
 
 Ticker::Ticker(std::string symbol) {
     spdlog::info ("Initialising {}", symbol);
@@ -386,4 +387,92 @@ bool Ticker::saveSamplesTo(std::ofstream& file) {
     }
 
     return true;
+}
+
+void TickerUtil::addSampleRanges() {
+    std::ifstream file ("Samples.csv");
+
+    if(!file.is_open()) {
+        spdlog::error("TickerUtil::addSampleRanges : Cannot open file : 'Samples.csv'");
+        return;
+    }
+
+    std::vector<std::string> sample_strings;
+
+    std::string header;
+    getline(file, header);
+    std::string min_range;
+    getline(file, min_range);
+    std::string max_range;
+    getline(file, max_range);
+
+    std::string line;
+    while(getline(file, line)) {
+        sample_strings.push_back(line);
+        min_range = getNewMinRange(min_range, line);
+        max_range = getNewMaxRange(max_range, line);
+    }
+
+    std::ofstream samples_file;
+    samples_file.open("Samples.csv");
+    samples_file << header;
+    samples_file << min_range;
+    samples_file << max_range;
+    for(std::string s : sample_strings)
+        samples_file << s;
+
+}
+
+std::string TickerUtil::getNewMinRange(std::string previous, std::string current) {
+    if (previous.empty())
+        return current;
+
+    std::string new_header = "";
+
+    boost::char_separator<char> sep (",");
+
+    boost::tokenizer<boost::char_separator<char>> prev_tokens (previous, sep);
+    boost::tokenizer<boost::char_separator<char>> curr_tokens (current, sep);
+
+    auto prev_iter = prev_tokens.begin();
+    auto curr_iter = curr_tokens.begin();
+
+    while(prev_iter != prev_tokens.end() && curr_iter != curr_tokens.end()) {
+        new_header += std::to_string(std::min(std::stof(*prev_iter), std::stof(*curr_iter)));
+        new_header += ",";
+    }
+
+    if(!new_header.empty())
+        new_header.pop_back();
+
+    new_header += "\n";
+
+    return new_header;
+}
+
+std::string TickerUtil::getNewMaxRange(std::string previous, std::string current) {
+    if (previous.empty())
+        return current;
+
+    std::string new_header = "";
+
+    boost::char_separator<char> sep (",");
+
+    boost::tokenizer<boost::char_separator<char>> prev_tokens (previous, sep);
+    boost::tokenizer<boost::char_separator<char>> curr_tokens (current, sep);
+
+    auto prev_iter = prev_tokens.begin();
+    auto curr_iter = curr_tokens.begin();
+
+    while(prev_iter != prev_tokens.end() && curr_iter != curr_tokens.end()) {
+        new_header += std::to_string(std::max(std::stof(*prev_iter), std::stof(*curr_iter)));
+        new_header += ",";
+    }
+
+    if(!new_header.empty())
+        new_header.pop_back();
+
+    new_header += "\n";
+
+    return new_header;
 }

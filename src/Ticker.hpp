@@ -3,6 +3,8 @@
 
 #include "Spot.hpp"
 #include "Sample.hpp"
+#include <spdlog/spdlog.h>
+#include <fstream>
 
 enum Interval {MINUTE, HOUR, DAY, MONTH, YEAR };
 
@@ -62,5 +64,11 @@ class Ticker
         std::vector<Sample *> m_oSamples;
         int m_nMultiplier;
 };
+
+namespace TickerUtil {
+        void addSampleRanges();
+        std::string getNewMinRange(std::string previous, std::string current);
+        std::string getNewMaxRange(std::string previous, std::string current);
+}
 
 #endif // TICKER_H_

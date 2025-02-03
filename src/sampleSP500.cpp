@@ -35,7 +35,9 @@ int main() {
     int strIdx;
     int requests = 0;
 
-    for(int i=0; i<20; i++) {
+    srand(time(NULL));
+
+    for(int i=0; i<50; i++) {
         if (requests > 0 && requests % 5 == 0) // then we wait 1 minute as polygon only allows 5 requests a minute
             std::this_thread::sleep_for(std::chrono::minutes(1));
 
@@ -46,7 +48,7 @@ int main() {
 
         t = new Ticker(tickStr[strIdx]);
         t->setMultiplier(30);
-        t->getPriceSamples("2024-01-21", "2024-11-21", MINUTE, 32, 80);
+        t->getPriceSamples("2024-01-21", "2024-11-21", MINUTE, 4, 160);
         requests++;
 
         // if false the no samples have been loaded
