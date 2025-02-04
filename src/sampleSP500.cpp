@@ -37,7 +37,7 @@ int main() {
 
     srand(time(NULL));
 
-    for(int i=0; i<50; i++) {
+    for(int i=0; i<75; i++) {
         if (requests > 0 && requests % 5 == 0) // then we wait 1 minute as polygon only allows 5 requests a minute
             std::this_thread::sleep_for(std::chrono::minutes(1));
 
@@ -61,6 +61,6 @@ int main() {
         delete t;
     }
     file.close();
-
+    TickerUtil::addSampleRanges();
     return 0;
 }

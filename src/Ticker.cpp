@@ -396,13 +396,16 @@ void TickerUtil::addSampleRanges() {
         spdlog::error("TickerUtil::addSampleRanges : Cannot open file : 'Samples.csv'");
         return;
     }
+    spdlog::info("TickerUtil::addSampleRanges : Adding ranges to : 'Samples.csv'");
 
     std::vector<std::string> sample_strings;
 
     std::string header;
     getline(file, header);
+
     std::string min_range;
     getline(file, min_range);
+
     std::string max_range;
     getline(file, max_range);
 
@@ -415,11 +418,11 @@ void TickerUtil::addSampleRanges() {
 
     std::ofstream samples_file;
     samples_file.open("Samples.csv");
-    samples_file << header;
+    samples_file << header << "\n";
     samples_file << min_range;
     samples_file << max_range;
     for(std::string s : sample_strings)
-        samples_file << s;
+        samples_file << s << "\n";
 
 }
 
@@ -438,7 +441,7 @@ std::string TickerUtil::getNewMinRange(std::string previous, std::string current
     auto curr_iter = curr_tokens.begin();
 
     while(prev_iter != prev_tokens.end() && curr_iter != curr_tokens.end()) {
-        new_header += std::to_string(std::min(std::stof(*prev_iter), std::stof(*curr_iter)));
+        new_header += std::to_string(std::min(std::stof(*prev_iter++), std::stof(*curr_iter++)));
         new_header += ",";
     }
 
@@ -465,7 +468,7 @@ std::string TickerUtil::getNewMaxRange(std::string previous, std::string current
     auto curr_iter = curr_tokens.begin();
 
     while(prev_iter != prev_tokens.end() && curr_iter != curr_tokens.end()) {
-        new_header += std::to_string(std::max(std::stof(*prev_iter), std::stof(*curr_iter)));
+        new_header += std::to_string(std::max(std::stof(*prev_iter++), std::stof(*curr_iter++)));
         new_header += ",";
     }
 
