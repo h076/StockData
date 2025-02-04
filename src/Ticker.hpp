@@ -20,7 +20,7 @@ class Ticker
 
         void loadHistoricalSpots(std::string from, std::string to);
 
-        void loadHistoricalSpots(std::time_t from, std::time_t to);
+        void loadHistoricalSpots(std::time_t from, std::time_t to, bool recursiveCall);
 
         void setInterval(Interval interval);
         std::string getInterval() const {return m_sInterval;}

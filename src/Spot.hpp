@@ -28,6 +28,8 @@ class Spot
 
         std::string getDateToString();
 
+        std::time_t getEpochDate() const {return m_tDate;}
+
         std::string toString();
 
         void printSpot();

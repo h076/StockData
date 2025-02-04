@@ -48,7 +48,7 @@ TEST_F(TickerTest, ClearSpotsAndSamples) {
     std::time_t from = std::time(nullptr) - 2000000;
     std::time_t to = std::time(nullptr) - 2000;
 
-    ticker->loadHistoricalSpots(from, to);
+    ticker->loadHistoricalSpots(from, to, false);
     EXPECT_FALSE(ticker->getSpots().empty());
     ticker->clearSpots();
     EXPECT_TRUE(ticker->getSpots().empty());
@@ -64,7 +64,7 @@ TEST_F(TickerTest, ClearSpotsAndSamples) {
 TEST_F(TickerTest, GetClosePriceArr) {
     std::time_t from = std::time(nullptr) - 2000000;
     std::time_t to = std::time(nullptr) - 2000;
-    ticker->loadHistoricalSpots(from, to);
+    ticker->loadHistoricalSpots(from, to, false);
 
     int arrSize;
     double* closePrices = ticker->getClosePriceArr(&arrSize);

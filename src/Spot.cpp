@@ -11,7 +11,7 @@ Spot::Spot(std::time_t date, double open, double high, double low, double close)
 }
 
 Spot::Spot(std::string date, double open, double high, double low, double close) {
-    m_tDate = dateToEpoch(date.c_str());
+    m_tDate = timeUtils::dateToEpoch(date.c_str());
     m_dOpen = open;
     m_dHigh = high;
     m_dLow = low;
@@ -27,7 +27,7 @@ Spot::Spot(std::time_t date, double price) {
 }
 
 Spot::Spot(std::string date, double price) {
-    m_tDate = dateToEpoch(date.c_str());
+    m_tDate = timeUtils::dateToEpoch(date.c_str());
     m_dOpen = price;
     m_dHigh = price;
     m_dLow = price;
@@ -43,7 +43,7 @@ double Spot::getLow() const {return m_dLow;}
 double Spot::getClose() const {return m_dClose;}
 
 std::string Spot::getDateToString() {
-    return epochToDate(m_tDate);
+    return timeUtils::epochToDate(m_tDate);
 }
 
 std::string Spot::toString() {

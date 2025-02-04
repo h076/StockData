@@ -36,12 +36,12 @@ void Ticker::loadAPIKey() {
 }
 // add and check intervals
 void Ticker::loadHistoricalSpots(std::string from, std::string to) {
-    loadHistoricalSpots(dateToEpoch(from.c_str()), dateToEpoch(to.c_str()));
+    loadHistoricalSpots(timeUtils::dateToEpoch(from.c_str()), timeUtils::dateToEpoch(to.c_str()), false);
 }
 
-void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to) {
+void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to, bool recursiveCall) {
 
-    if(m_oSpots.size() != 0)
+    if(m_oSpots.size() != 0 && !recursiveCall)
         clearSpots();
 
     Storage * returnData = downloadHistoricalData(m_sSymbol, from, to, m_sInterval, m_sAPIKey, getMultiplier());
@@ -126,6 +126,16 @@ void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to) {
     }
 
     delete returnData;
+
+    // Add check that the time of the last given spot is not before the 'to' date
+    std::time_t last_date = m_oSpots.back()->getEpochDate();
+    if(timeUtils::preceedDate(last_date, to, m_sInterval, getMultiplier())) {
+        loadHistoricalSpots(last_date, to, true);
+        m_oSpots.pop_back(); // prevent double load of last spot
+    }
+
+    displaySpots();
+    std::cout << "number of spots : " << m_oSpots.size() << std::endl;
 
     spdlog::info("Loaded historical spots from {} to {}", ctime (&from), ctime (&to));
 }
@@ -242,7 +252,6 @@ void Ticker::getPriceSamples(std::string from, std::string to, Interval interval
         return;
     }
 
-
     loadHistoricalSpots(from, to);
 
     m_oSamples.clear();
@@ -303,8 +312,8 @@ void Ticker::getPriceSamples(std::string from, std::string to, Interval interval
     free(highArr);
     free(lowArr);
 
-    std::time_t tFrom = dateToEpoch(from.c_str());
-    std::time_t tTo = dateToEpoch(to.c_str());
+    std::time_t tFrom = timeUtils::dateToEpoch(from.c_str());
+    std::time_t tTo = timeUtils::dateToEpoch(to.c_str());
 
     spdlog::info("Loaded {} samples of length {} from {} to {}",
                  sampleCount, sampleLength, ctime(&tFrom), ctime(&tTo));
