@@ -1,5 +1,6 @@
 #include "Sample.hpp"
 #include <climits>
+#include <string>
 
 Sample::Sample(double * closeSample, double * highSample, double * lowSample,
                int sampleLength, int trainSplit = 70) {
@@ -94,6 +95,35 @@ double Sample::getMACD() {
 }
 
 double * Sample::getMACDRange() {
+    double min = -1.0;
+    double max = 1.0;
+    double * r = (double *) malloc(2*sizeof(double));
+
+    *r = min;
+    *(r+1) = max;
+    return r;
+}
+
+double Sample::getMACDSignal() {
+    int outBegIdx;
+    int outNBElement;
+
+    int optInFastPeriod = 12;
+    int optInSlowPeriod = 26;
+    int optInSignalPeriod = 9;
+
+    double * outMACD = (double *) malloc(m_nSampleLength*sizeof(double));
+    double * outMACDSignal = (double *) malloc(m_nSampleLength*sizeof(double));
+    double * outMACDHist = (double *) malloc(m_nSampleLength*sizeof(double));
+
+    TA_MACD(0, static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100)), m_dpSampleClose,
+            optInFastPeriod, optInSlowPeriod, optInSignalPeriod, &outBegIdx, &outNBElement, outMACD,
+            outMACDSignal, outMACDHist);
+
+    return *(outMACD+outNBElement-1);
+}
+
+double * Sample::getMACDSignalRange() {
     double min = -1.0;
     double max = 1.0;
     double * r = (double *) malloc(2*sizeof(double));
@@ -494,6 +524,56 @@ double * Sample::getTRIXRange() {
     return r;
 }
 
+/*
+ * TA_AROONOSC - Aroon Oscillator
+ *
+ * Input  = High, Low
+ * Output = double
+ *
+ * Optional Parameters
+ * -------------------
+ * optInTimePeriod:(From 2 to 100000)
+ *    Number of period
+ *
+ *
+
+TA_RetCode TA_AROONOSC( int    startIdx,
+                        int    endIdx,
+                        const double inHigh[],
+                        const double inLow[],
+                        int           optInTimePeriod, /* From 2 to 100000
+                        int          *outBegIdx,
+                        int          *outNBElement,
+                        double        outReal[] );
+*/
+
+double Sample::getAROON() {
+    int startIdx = 0;
+    int endIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100));
+
+    int optInTimePeriod = 25;
+
+    int outBegIdx;
+    int outNBElement;
+
+    double * outReal = (double *) malloc(m_nSampleLength*sizeof(double));
+
+    TA_AROONOSC(startIdx, endIdx, m_dpSampleHigh, m_dpSampleLow, optInTimePeriod,
+                &outBegIdx, &outNBElement, outReal);
+
+    return *(outReal+outNBElement-1);
+}
+
+double * Sample::getAROONRange() {
+    double min = -100.0;
+    double max = 100.0;
+    double * r = (double *) malloc(2*sizeof(double));
+
+    *r = min;
+    *(r+1) = max;
+    return r;
+}
+
 
 double Sample::getSampleY() {
     int startIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100))+1;
@@ -526,24 +606,24 @@ double Sample::maxInRange(double * r) {
 }
 
 std::string Sample::toCSVLine() {
-    return  std::to_string(getRSI()) + "," + std::to_string(getMACD()) + "," + std::to_string(getClose()) + "," + std::to_string(getStochFastK())
-         + "," + std::to_string(getStochFastD()) + "," + std::to_string(getWilliamsR()) + "," + std::to_string(getUltimateOscillator())
+    return  std::to_string(getRSI()) + "," + std::to_string(getMACD()) + "," + std::to_string(getMACDSignal()) + "," + std::to_string(getClose()) + "," + std::to_string(getStochFastK())
+         + "," + std::to_string(getStochFastD()) + "," + std::to_string(getAROON()) + "," + std::to_string(getWilliamsR()) + "," + std::to_string(getUltimateOscillator())
          + "," + std::to_string(getTSF()) + "," + std::to_string(getCCI()) + "," + std::to_string(getSampleY()) + "\n";
 
 }
 
 std::string Sample::minRangeToCSV() {
-    return std::to_string(minInRange(getRSIRange())) + "," + std::to_string(minInRange(getMACDRange())) + "," + std::to_string(minInRange(getCloseRange())) + "," + std::to_string(minInRange(getStochFastKRange()))
-         + "," + std::to_string(minInRange(getStochFastDRange())) + "," + std::to_string(minInRange(getWilliamsRRange())) + "," + std::to_string(minInRange(getUltimateOscillatorRange()))
+    return std::to_string(minInRange(getRSIRange())) + "," + std::to_string(minInRange(getMACDRange())) + "," + std::to_string(minInRange(getMACDSignalRange())) + "," + std::to_string(minInRange(getCloseRange())) + "," + std::to_string(minInRange(getStochFastKRange()))
+         + "," + std::to_string(minInRange(getStochFastDRange())) + "," + std::to_string(minInRange(getAROONRange())) + "," + std::to_string(minInRange(getWilliamsRRange())) + "," + std::to_string(minInRange(getUltimateOscillatorRange()))
          + "," + std::to_string(minInRange(getTSFRange())) + "," + std::to_string(minInRange(getCCIRange())) + "," + std::to_string(minInRange(getYRange())) + "\n";
 }
 
 std::string Sample::maxRangeToCSV() {
-    return std::to_string(maxInRange(getRSIRange())) + "," + std::to_string(maxInRange(getMACDRange())) + "," + std::to_string(maxInRange(getCloseRange())) + "," + std::to_string(maxInRange(getStochFastKRange()))
-         + "," + std::to_string(maxInRange(getStochFastDRange())) + "," + std::to_string(maxInRange(getWilliamsRRange())) + "," + std::to_string(maxInRange(getUltimateOscillatorRange()))
+    return std::to_string(maxInRange(getRSIRange())) + "," + std::to_string(maxInRange(getMACDRange())) + "," + std::to_string(maxInRange(getMACDSignalRange())) + "," + std::to_string(maxInRange(getCloseRange())) + "," + std::to_string(maxInRange(getStochFastKRange()))
+         + "," + std::to_string(maxInRange(getStochFastDRange())) + "," + std::to_string(maxInRange(getAROONRange())) + "," + std::to_string(maxInRange(getWilliamsRRange())) + "," + std::to_string(maxInRange(getUltimateOscillatorRange()))
          + "," + std::to_string(maxInRange(getTSFRange())) + "," + std::to_string(maxInRange(getCCIRange())) + "," + std::to_string(maxInRange(getYRange())) + "\n";
 }
 
 const std::string Sample::toCSVHeader() {
-    return "RSI,MACD,Close,Stochastic Fast K,Stochastic Fast D,Williams %R,Ultimate Oscilator,TSF,CCI,Y\n";
+    return "RSI,MACD,MACD Signal,Close,Stochastic Fast K,Stochastic Fast D,AROON Osc,Williams %R,Ultimate Oscilator,TSF,CCI,Y\n";
 }

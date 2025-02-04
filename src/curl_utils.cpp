@@ -80,5 +80,7 @@ Storage * downloadHistoricalData(std::string symbol,
     }
     curl_global_cleanup();
 
+    spdlog::info("CuRL : recieved a chunck of size {}", chunk->size);
+
     return chunk;
 }

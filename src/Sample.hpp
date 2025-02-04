@@ -25,6 +25,9 @@ class Sample
         double getMACD();
         double * getMACDRange();
 
+        double getMACDSignal();
+        double * getMACDSignalRange();
+
         double getClose();
         double * getCloseRange();
 
@@ -53,6 +56,9 @@ class Sample
 
         double getTRIX();
         double * getTRIXRange();
+
+        double getAROON();
+        double * getAROONRange();
 
         double getSampleY(); // return percentage increase from start to end of test portion
         double * getYRange();
