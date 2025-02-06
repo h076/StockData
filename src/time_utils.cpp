@@ -63,10 +63,6 @@ bool timeUtils::preceedDate(const std::time_t check, const std::time_t against, 
 
     std::time_t newTime = mktime(time);
     double diff = difftime(against, newTime);
-    std::cout << "newTime : " << timeUtils::epochToDate(newTime) <<std::endl;
-    std::cout << "against : " << timeUtils::epochToDate(against) << std::endl;
-
-    std::cout << "time diff : " << diff << std::endl;
 
     if(diff > partial || diff > 0)
         return true;

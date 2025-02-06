@@ -3,6 +3,7 @@
 #include "curl_utils.hpp"
 #include "time_utils.hpp"
 #include <__config>
+#include <chrono>
 #include <cstddef>
 #include <cstdio>
 #include <spdlog/spdlog.h>
@@ -59,11 +60,31 @@ void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to, bool recursiv
         memPtr++;
     }
     memPtr++;
-
     if(memPtr >= endPtr) {
         spdlog::error("Invalid data format - no opening '[' found");
         spdlog::info ("data : {}", returnData->memory);
+
+        std::string error(returnData->memory);
         delete returnData;
+
+        // most likely that too many requests have been made
+        if(error.substr(11, 5) == "ERROR") {
+            spdlog::info("Sleeping for 1 minute to avoid maximum request error.");
+            std::this_thread::sleep_for(std::chrono::minutes(1));
+            if(m_oSpots.empty()) {
+                loadHistoricalSpots(from, to, true);
+                spdlog::info("Loaded historical spots from {} to {}", ctime (&from), ctime (&to));
+                return;
+            }
+
+            std::time_t last_date = m_oSpots.back()->getEpochDate();
+            if(timeUtils::preceedDate(last_date, to, m_sInterval, getMultiplier())) {
+                loadHistoricalSpots(last_date, to, true);
+                m_oSpots.pop_back(); // prevent double load of last spot
+                                     //
+                spdlog::info("Loaded historical spots from {} to {}", ctime (&from), ctime (&to));
+            }
+        }
         return;
     }
     memPtr++;
@@ -134,8 +155,8 @@ void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to, bool recursiv
         m_oSpots.pop_back(); // prevent double load of last spot
     }
 
-    displaySpots();
-    std::cout << "number of spots : " << m_oSpots.size() << std::endl;
+    //displaySpots();
+    //std::cout << "number of spots : " << m_oSpots.size() << std::endl;
 
     spdlog::info("Loaded historical spots from {} to {}", ctime (&from), ctime (&to));
 }
