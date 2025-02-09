@@ -14,6 +14,8 @@ Sample::Sample(double * closeSample, double * highSample, double * lowSample,
 
     m_nSampleLength = sampleLength;
     m_nTrainSplit = trainSplit;
+
+    m_eSignal = yToSignal(getSampleY());
 }
 
 Sample::~Sample() {
@@ -66,8 +68,8 @@ double * Sample::getRSIRange() {
                     int    endIdx,
                     const double inReal[],
                     int           optInFastPeriod,  From 2 to 100000
-                    int           optInSlowPeriod, /* From 2 to 100000
-                    int           optInSignalPeriod, /* From 1 to 100000
+                    int           optInSlowPeriod, From 2 to 100000
+                    int           optInSignalPeriod, From 1 to 100000
                     int          *outBegIdx,
                     int          *outNBElement,
                     double        outMACD[],
@@ -160,8 +162,8 @@ TA_RetCode TA_STOCHF( int    startIdx,
                       const double inHigh[],
                       const double inLow[],
                       const double inClose[],
-                      int           optInFastK_Period, /* From 1 to 100000
-                      int           optInFastD_Period, /* From 1 to 100000
+                      int           optInFastK_Period, From 1 to 100000
+                      int           optInFastD_Period, From 1 to 100000
                       TA_MAType     optInFastD_MAType,
                       int          *outBegIdx,
                       int          *outNBElement,
@@ -237,7 +239,7 @@ double * Sample::getStochFastDRange() {
                      const double inHigh[],
                      const double inLow[],
                      const double inClose[],
-                     int           optInTimePeriod, /* From 2 to 100000
+                     int           optInTimePeriod, From 2 to 100000
                      int          *outBegIdx,
                      int          *outNBElement,
                      double        outReal[] );
@@ -276,9 +278,9 @@ double * Sample::getWilliamsRRange() {
                       const double inHigh[],
                       const double inLow[],
                       const double inClose[],
-                      int           optInTimePeriod1, /* From 1 to 100000
-                      int           optInTimePeriod2, /* From 1 to 100000
-                      int           optInTimePeriod3, /* From 1 to 100000
+                      int           optInTimePeriod1, From 1 to 100000
+                      int           optInTimePeriod2, From 1 to 100000
+                      int           optInTimePeriod3, From 1 to 100000
                       int          *outBegIdx,
                       int          *outNBElement,
                       double        outReal[] );
@@ -317,7 +319,7 @@ double * Sample::getUltimateOscillatorRange() {
  * TA_RetCode TA_TSF( int    startIdx,
                    int    endIdx,
                    const double inReal[],
-                   int           optInTimePeriod, /* From 2 to 100000
+                   int           optInTimePeriod, From 2 to 100000
                    int          *outBegIdx,
                    int          *outNBElement,
                    double        outReal[] );
@@ -372,7 +374,7 @@ double * Sample::getTSFRange() {
  * TA_RetCode TA_DEMA( int    startIdx,
                     int    endIdx,
                     const double inReal[],
-                    int           optInTimePeriod, /* From 2 to 100000
+                    int           optInTimePeriod, From 2 to 100000
                     int          *outBegIdx,
                     int          *outNBElement,
                     double        outReal[] );
@@ -541,7 +543,7 @@ TA_RetCode TA_AROONOSC( int    startIdx,
                         int    endIdx,
                         const double inHigh[],
                         const double inLow[],
-                        int           optInTimePeriod, /* From 2 to 100000
+                        int           optInTimePeriod, From 2 to 100000
                         int          *outBegIdx,
                         int          *outNBElement,
                         double        outReal[] );
@@ -574,6 +576,134 @@ double * Sample::getAROONRange() {
     return r;
 }
 
+/*
+ * TA_AROON - Aroon
+ *
+ * Input  = High, Low
+ * Output = double, double
+ *
+ * Optional Parameters
+ * -------------------
+ * optInTimePeriod:(From 2 to 100000)
+ *    Number of period
+ *
+ *
+
+TA_RetCode TA_AROON( int    startIdx,
+                     int    endIdx,
+                     const double inHigh[],
+                     const double inLow[],
+                     int           optInTimePeriod,  From 2 to 100000
+                     int          *outBegIdx,
+                     int          *outNBElement,
+                     double        outAroonDown[],
+                     double        outAroonUp[] );*/
+
+double Sample::getAROONUP() {
+    int startIdx = 0;
+    int endIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100));
+
+    int optInTimePeriod = 25;
+
+    int outBegIdx;
+    int outNBElement;
+
+    double * outAroonDown = (double *) malloc(sizeof(double)*m_nSampleLength);
+    double * outAroonUp = (double *) malloc(sizeof(double)*m_nSampleLength);
+
+    TA_AROON(startIdx, endIdx, m_dpSampleHigh, m_dpSampleLow, optInTimePeriod, &outBegIdx,
+             &outNBElement, outAroonDown, outAroonUp);
+
+    free(outAroonDown);
+
+    return *(outAroonUp+outNBElement-1);
+}
+
+double * Sample::getAROONUPRange() {
+    double min = DBL_MAX;
+    double max = DBL_MIN;
+    double * r = (double *) malloc(sizeof(double)*2);
+
+    int startIdx = 0;
+    int endIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100));
+
+    int optInTimePeriod = 25;
+
+    int outBegIdx;
+    int outNBElement;
+
+    double * outAroonDown = (double *) malloc(sizeof(double)*m_nSampleLength);
+    double * outAroonUp = (double *) malloc(sizeof(double)*m_nSampleLength);
+
+    TA_AROON(startIdx, endIdx, m_dpSampleHigh, m_dpSampleLow, optInTimePeriod, &outBegIdx,
+             &outNBElement, outAroonDown, outAroonUp);
+
+    free(outAroonDown);
+
+    double val;
+    for(int i=0; i<outNBElement; i++) {
+        val = *(outAroonUp+i);
+        min = std::min(val, min);
+        max = std::max(val, max);
+    }
+
+    *r = min;
+    *(r+1) = max;
+    return r;
+}
+
+double Sample::getAROONDOWN() {
+    int startIdx = 0;
+    int endIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100));
+
+    int optInTimePeriod = 25;
+
+    int outBegIdx;
+    int outNBElement;
+
+    double * outAroonDown = (double *) malloc(sizeof(double)*m_nSampleLength);
+    double * outAroonUp = (double *) malloc(sizeof(double)*m_nSampleLength);
+
+    TA_AROON(startIdx, endIdx, m_dpSampleHigh, m_dpSampleLow, optInTimePeriod, &outBegIdx,
+             &outNBElement, outAroonDown, outAroonUp);
+
+    free(outAroonUp);
+
+    return *(outAroonDown+outNBElement-1);
+}
+
+double * Sample::getAROONDOWNRange() {
+    double min = DBL_MAX;
+    double max = DBL_MIN;
+    double * r = (double *) malloc(sizeof(double)*2);
+
+    int startIdx = 0;
+    int endIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100));
+
+    int optInTimePeriod = 25;
+
+    int outBegIdx;
+    int outNBElement;
+
+    double * outAroonDown = (double *) malloc(sizeof(double)*m_nSampleLength);
+    double * outAroonUp = (double *) malloc(sizeof(double)*m_nSampleLength);
+
+    TA_AROON(startIdx, endIdx, m_dpSampleHigh, m_dpSampleLow, optInTimePeriod, &outBegIdx,
+             &outNBElement, outAroonDown, outAroonUp);
+
+    free(outAroonUp);
+
+    double val;
+    for(int i=0; i<outNBElement; i++) {
+        val = *(outAroonDown+i);
+        min = std::min(val, min);
+        max = std::max(val, max);
+    }
+
+    *r = min;
+    *(r+1) = max;
+    return r;
+}
 
 double Sample::getSampleY() {
     int startIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100))+1;
@@ -584,8 +714,8 @@ double Sample::getSampleY() {
 }
 
 double * Sample::getYRange() {
-    double min = -30.0;
-    double max = 30.0;
+    double min = -2.0;
+    double max = 2.0;
     double * r = (double *) malloc(2*sizeof(double));
 
     *r = min;
@@ -606,24 +736,70 @@ double Sample::maxInRange(double * r) {
 }
 
 std::string Sample::toCSVLine() {
-    return  std::to_string(getRSI()) + "," + std::to_string(getMACD()) + "," + std::to_string(getMACDSignal()) + "," + std::to_string(getClose()) + "," + std::to_string(getStochFastK())
-         + "," + std::to_string(getStochFastD()) + "," + std::to_string(getAROON()) + "," + std::to_string(getWilliamsR()) + "," + std::to_string(getUltimateOscillator())
-         + "," + std::to_string(getTSF()) + "," + std::to_string(getCCI()) + "," + std::to_string(getSampleY()) + "\n";
+    return  std::to_string(getRSI()) + "," + std::to_string(getMACD())
+        + "," + std::to_string(getMACDSignal()) + "," + std::to_string(getClose())
+        + "," + std::to_string(getStochFastK()) + "," + std::to_string(getStochFastD())
+        + "," + std::to_string(getAROON()) + "," + std::to_string(getWilliamsR())
+        + "," + std::to_string(getUltimateOscillator()) + "," + std::to_string(getTSF())
+        + "," + std::to_string(getCCI()) + "," + std::to_string(getSampleY())
+        + "," + getSignalAsString() + "\n";
 
 }
 
 std::string Sample::minRangeToCSV() {
-    return std::to_string(minInRange(getRSIRange())) + "," + std::to_string(minInRange(getMACDRange())) + "," + std::to_string(minInRange(getMACDSignalRange())) + "," + std::to_string(minInRange(getCloseRange())) + "," + std::to_string(minInRange(getStochFastKRange()))
-         + "," + std::to_string(minInRange(getStochFastDRange())) + "," + std::to_string(minInRange(getAROONRange())) + "," + std::to_string(minInRange(getWilliamsRRange())) + "," + std::to_string(minInRange(getUltimateOscillatorRange()))
-         + "," + std::to_string(minInRange(getTSFRange())) + "," + std::to_string(minInRange(getCCIRange())) + "," + std::to_string(minInRange(getYRange())) + "\n";
+    return std::to_string(minInRange(getRSIRange())) + "," + std::to_string(minInRange(getMACDRange()))
+        + "," + std::to_string(minInRange(getMACDSignalRange())) + "," + std::to_string(minInRange(getCloseRange()))
+        + "," + std::to_string(minInRange(getStochFastKRange())) + "," + std::to_string(minInRange(getStochFastDRange()))
+        + "," + std::to_string(minInRange(getAROONRange())) + "," + std::to_string(minInRange(getWilliamsRRange()))
+        + "," + std::to_string(minInRange(getUltimateOscillatorRange())) + "," + std::to_string(minInRange(getTSFRange()))
+        + "," + std::to_string(minInRange(getCCIRange())) + "," + std::to_string(minInRange(getYRange())) + "\n";
 }
 
 std::string Sample::maxRangeToCSV() {
-    return std::to_string(maxInRange(getRSIRange())) + "," + std::to_string(maxInRange(getMACDRange())) + "," + std::to_string(maxInRange(getMACDSignalRange())) + "," + std::to_string(maxInRange(getCloseRange())) + "," + std::to_string(maxInRange(getStochFastKRange()))
-         + "," + std::to_string(maxInRange(getStochFastDRange())) + "," + std::to_string(maxInRange(getAROONRange())) + "," + std::to_string(maxInRange(getWilliamsRRange())) + "," + std::to_string(maxInRange(getUltimateOscillatorRange()))
-         + "," + std::to_string(maxInRange(getTSFRange())) + "," + std::to_string(maxInRange(getCCIRange())) + "," + std::to_string(maxInRange(getYRange())) + "\n";
+    return std::to_string(maxInRange(getRSIRange())) + "," + std::to_string(maxInRange(getMACDRange()))
+        + "," + std::to_string(maxInRange(getMACDSignalRange())) + "," + std::to_string(maxInRange(getCloseRange()))
+        + "," + std::to_string(maxInRange(getStochFastKRange())) + "," + std::to_string(maxInRange(getStochFastDRange()))
+        + "," + std::to_string(maxInRange(getAROONRange())) + "," + std::to_string(maxInRange(getWilliamsRRange()))
+        + "," + std::to_string(maxInRange(getUltimateOscillatorRange())) + "," + std::to_string(maxInRange(getTSFRange()))
+        + "," + std::to_string(maxInRange(getCCIRange())) + "," + std::to_string(maxInRange(getYRange())) + "\n";
 }
 
 const std::string Sample::toCSVHeader() {
-    return "RSI,MACD,MACD Signal,Close,Stochastic Fast K,Stochastic Fast D,AROON Osc,Williams %R,Ultimate Oscilator,TSF,CCI,Y\n";
+    return "RSI,MACD,MACD Signal,Close,Stochastic Fast K, \
+           Stochastic Fast D,AROON Osc,Williams %R,Ultimate Oscilator,TSF,CCI,Y,Signal\n";
+}
+
+// depends on the given range of y
+enum::signal Sample::yToSignal(double y) {
+    double * range = getYRange();
+    double min = *range;
+    double max = *(range+1);
+    free(range);
+
+    if (y > 0.50*max) {
+        return STRONG_BUY;
+    }else if (y <= 0.50*max && y > 0.25*max) {
+        return BUY;
+    }else if (y <= 0.25*max && y >= 0.25*min) {
+        return HOLD;
+    }else if (y < 0.25*min && y >= 0.5*min) {
+        return SELL;
+    }else {
+        return STRONG_SELL;
+    }
+}
+
+std::string Sample::getSignalAsString() {
+    switch(m_eSignal) {
+        case STRONG_BUY:
+            return "strong buy";
+        case BUY:
+            return "buy";
+        case HOLD:
+            return "hold";
+        case SELL:
+            return "sell";
+        case STRONG_SELL:
+            return "strong sell";
+    }
 }

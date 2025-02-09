@@ -7,6 +7,8 @@
 #include <string.h>
 #include "ta-lib/ta_libc.h"
 
+enum signal {STRONG_BUY, BUY, HOLD, SELL, STRONG_SELL};
+
 class Sample
 {
 
@@ -60,6 +62,12 @@ class Sample
         double getAROON();
         double * getAROONRange();
 
+        double getAROONUP();
+        double * getAROONUPRange();
+
+        double getAROONDOWN();
+        double * getAROONDOWNRange();
+
         double getSampleY(); // return percentage increase from start to end of test portion
         double * getYRange();
 
@@ -71,12 +79,19 @@ class Sample
         std::string maxRangeToCSV();
         const std::string toCSVHeader();
 
+        enum::signal yToSignal(double y);
+        std::string getSignalAsString();
+
     private:
         double * m_dpSampleClose;
         double * m_dpSampleHigh;
         double * m_dpSampleLow;
         int m_nSampleLength;
         int m_nTrainSplit;
+
+        enum::signal m_eSignal;
+
+
 };
 
 #endif // SAMPLE_H_
