@@ -50,6 +50,8 @@ class Ticker
         void saveSamplesCSV();
         bool saveSamplesTo(std::ofstream& file);
 
+        void test_addSampleRanges();
+
         class TickerException : public std::runtime_error {
             public:
                 explicit TickerException(const std::string& message)
@@ -69,6 +71,7 @@ namespace TickerUtil {
         void addSampleRanges();
         std::string getNewMinRange(std::string previous, std::string current);
         std::string getNewMaxRange(std::string previous, std::string current);
+        bool isValue(std::string s);
 }
 
 #endif // TICKER_H_

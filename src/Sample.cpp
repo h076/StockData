@@ -122,7 +122,7 @@ double Sample::getMACDSignal() {
             optInFastPeriod, optInSlowPeriod, optInSignalPeriod, &outBegIdx, &outNBElement, outMACD,
             outMACDSignal, outMACDHist);
 
-    return *(outMACD+outNBElement-1);
+    return *(outMACDSignal+outNBElement-1);
 }
 
 double * Sample::getMACDSignalRange() {

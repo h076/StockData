@@ -8,10 +8,11 @@ int main() {
     int sampleCount = 100;
     int sampleLength = 120;
     apple->setMultiplier(30);
-    apple->getPriceSamples("2023-01-01", "2023-04-01", MINUTE, sampleCount, sampleLength);
+    //apple->getPriceSamples("2023-01-01", "2023-04-01", MINUTE, sampleCount, sampleLength);
     //apple->displaySamples();
     //apple->displaySamplesFeatures();
-    apple->saveSamplesCSV();
+    //apple->saveSamplesCSV();
+    apple->test_addSampleRanges();
     delete apple;
 
     return 0;

@@ -8,9 +8,11 @@
 #include <cstdio>
 #include <spdlog/spdlog.h>
 #include <stdexcept>
+#include <string>
 #include <time.h>
 #include <unordered_set>
 #include <boost/tokenizer.hpp>
+#include <cctype>
 
 Ticker::Ticker(std::string symbol) {
     spdlog::info ("Initialising {}", symbol);
@@ -73,7 +75,7 @@ void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to, bool recursiv
             std::this_thread::sleep_for(std::chrono::minutes(1));
             if(m_oSpots.empty()) {
                 loadHistoricalSpots(from, to, true);
-                spdlog::info("Loaded historical spots from {} to {}", ctime (&from), ctime (&to));
+                spdlog::info("Loaded historical spots from {0} to {1}", ctime (&from), ctime (&to));
                 return;
             }
 
@@ -82,7 +84,7 @@ void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to, bool recursiv
                 loadHistoricalSpots(last_date, to, true);
                 m_oSpots.pop_back(); // prevent double load of last spot
                                      //
-                spdlog::info("Loaded historical spots from {} to {}", ctime (&from), ctime (&to));
+                spdlog::info("Loaded historical spots from {0} to {1}", ctime (&from), ctime (&to));
             }
         }
         return;
@@ -158,7 +160,7 @@ void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to, bool recursiv
     //displaySpots();
     //std::cout << "number of spots : " << m_oSpots.size() << std::endl;
 
-    spdlog::info("Loaded historical spots from {} to {}", ctime (&from), ctime (&to));
+    spdlog::info("Loaded historical spots from {0} to {1}", ctime (&from), ctime (&to));
 }
 
 void Ticker::setInterval(Interval interval) {
@@ -391,6 +393,7 @@ void Ticker::saveSamplesCSV() {
     for(auto & s : m_oSamples) {
         file << s->toCSVLine();
     }
+    //TickerUtil::addSampleRanges();
     file.close();
     return;
 }
@@ -417,6 +420,10 @@ bool Ticker::saveSamplesTo(std::ofstream& file) {
     }
 
     return true;
+}
+
+void Ticker::test_addSampleRanges() {
+    TickerUtil::addSampleRanges();
 }
 
 void TickerUtil::addSampleRanges() {
@@ -471,8 +478,10 @@ std::string TickerUtil::getNewMinRange(std::string previous, std::string current
     auto curr_iter = curr_tokens.begin();
 
     while(prev_iter != prev_tokens.end() && curr_iter != curr_tokens.end()) {
-        new_header += std::to_string(std::min(std::stof(*prev_iter++), std::stof(*curr_iter++)));
-        new_header += ",";
+        if(isValue(*prev_iter) && isValue(*curr_iter)) {
+            new_header += std::to_string(std::min(std::stof(*prev_iter++), std::stof(*curr_iter++)));
+            new_header += ",";
+        }
     }
 
     if(!new_header.empty())
@@ -498,8 +507,10 @@ std::string TickerUtil::getNewMaxRange(std::string previous, std::string current
     auto curr_iter = curr_tokens.begin();
 
     while(prev_iter != prev_tokens.end() && curr_iter != curr_tokens.end()) {
-        new_header += std::to_string(std::max(std::stof(*prev_iter++), std::stof(*curr_iter++)));
-        new_header += ",";
+        if(isValue(*prev_iter) && isValue(*curr_iter)) {
+            new_header += std::to_string(std::max(std::stof(*prev_iter++), std::stof(*curr_iter++)));
+            new_header += ",";
+        }
     }
 
     if(!new_header.empty())
@@ -508,4 +519,10 @@ std::string TickerUtil::getNewMaxRange(std::string previous, std::string current
     new_header += "\n";
 
     return new_header;
+}
+
+bool TickerUtil::isValue(std::string s) {
+    if(isalpha(static_cast<int>(s[0])))
+        return false;
+    return true;
 }
