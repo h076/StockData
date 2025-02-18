@@ -15,7 +15,7 @@ Sample::Sample(double * closeSample, double * highSample, double * lowSample,
     m_nSampleLength = sampleLength;
     m_nTrainSplit = trainSplit;
 
-    m_eSignal = yToSignal(getSampleY());
+    //m_eSignal = yToSignal(getSampleY());
 }
 
 Sample::~Sample() {
@@ -42,14 +42,14 @@ std::string Sample::strPart(int index) {
         + ", L: " + std::to_string(*(m_dpSampleLow)) + "}";
 }
 
-double Sample::getRSI() {
+double Sample::RSIHandler::getRSI() {
     int outBegIdx;
     int outNBElement;
-    double * rsiOut = (double *) malloc(m_nSampleLength*sizeof(double));
+    double * rsiOut = (double *) malloc(sample->m_nSampleLength*sizeof(double));
 
     // 14 is number of intervals to use to calculate RSI
-    TA_RSI(0, static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100)), m_dpSampleClose,
-                  14, &outBegIdx, &outNBElement, rsiOut);
+    TA_RSI(0, static_cast<int>(sample->m_nSampleLength*(static_cast<float>(sample->m_nTrainSplit)/100)),
+           sample->m_dpSampleClose, 14, &outBegIdx, &outNBElement, rsiOut);
 
     return *(rsiOut+outNBElement-1);
 }
@@ -77,7 +77,7 @@ double * Sample::getRSIRange() {
                     double        outMACDHist[] );
  */
 
-double Sample::getMACD() {
+double Sample::MACDHandler::getMACD() {
     int outBegIdx;
     int outNBElement;
 
@@ -85,11 +85,12 @@ double Sample::getMACD() {
     int optInSlowPeriod = 26;
     int optInSignalPeriod = 9;
 
-    double * outMACD = (double *) malloc(m_nSampleLength*sizeof(double));
-    double * outMACDSignal = (double *) malloc(m_nSampleLength*sizeof(double));
-    double * outMACDHist = (double *) malloc(m_nSampleLength*sizeof(double));
+    double * outMACD = (double *) malloc(sample->m_nSampleLength*sizeof(double));
+    double * outMACDSignal = (double *) malloc(sample->m_nSampleLength*sizeof(double));
+    double * outMACDHist = (double *) malloc(sample->m_nSampleLength*sizeof(double));
 
-    TA_MACD(0, static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100)), m_dpSampleClose,
+    TA_MACD(0, static_cast<int>(sample->m_nSampleLength*(static_cast<float>(sample->m_nTrainSplit)/100)),
+            sample->m_dpSampleClose,
             optInFastPeriod, optInSlowPeriod, optInSignalPeriod, &outBegIdx, &outNBElement, outMACD,
             outMACDSignal, outMACDHist);
 
@@ -106,7 +107,7 @@ double * Sample::getMACDRange() {
     return r;
 }
 
-double Sample::getMACDSignal() {
+double Sample::MACDSignalHandler::getMACDSignal() {
     int outBegIdx;
     int outNBElement;
 
@@ -114,11 +115,12 @@ double Sample::getMACDSignal() {
     int optInSlowPeriod = 26;
     int optInSignalPeriod = 9;
 
-    double * outMACD = (double *) malloc(m_nSampleLength*sizeof(double));
-    double * outMACDSignal = (double *) malloc(m_nSampleLength*sizeof(double));
-    double * outMACDHist = (double *) malloc(m_nSampleLength*sizeof(double));
+    double * outMACD = (double *) malloc(sample->m_nSampleLength*sizeof(double));
+    double * outMACDSignal = (double *) malloc(sample->m_nSampleLength*sizeof(double));
+    double * outMACDHist = (double *) malloc(sample->m_nSampleLength*sizeof(double));
 
-    TA_MACD(0, static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100)), m_dpSampleClose,
+    TA_MACD(0, static_cast<int>(sample->m_nSampleLength*(static_cast<float>(sample->m_nTrainSplit)/100)),
+            sample->m_dpSampleClose,
             optInFastPeriod, optInSlowPeriod, optInSignalPeriod, &outBegIdx, &outNBElement, outMACD,
             outMACDSignal, outMACDHist);
 
@@ -135,8 +137,9 @@ double * Sample::getMACDSignalRange() {
     return r;
 }
 
-double Sample::getClose() {
-    return *(m_dpSampleClose+static_cast<int>((m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100))));
+double Sample::CloseHandler::getClose() {
+    return *(sample->m_dpSampleClose+static_cast<int>(
+            (sample->m_nSampleLength*(static_cast<float>(sample->m_nTrainSplit)/100))));
 }
 
 double * Sample::getCloseRange() {
@@ -171,9 +174,9 @@ TA_RetCode TA_STOCHF( int    startIdx,
                       double        outFastD[] );
 */
 
-double Sample::getStochFastK() {
+double Sample::StochFastKHandler::getStochFastK() {
     int startIdx = 0;
-    int endIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100));
+    int endIdx = static_cast<int>(sample->m_nSampleLength*(static_cast<float>(sample->m_nTrainSplit)/100));
 
     int optInFastK_Period = 5;
     int optInFastD_Period = 4;
@@ -183,10 +186,10 @@ double Sample::getStochFastK() {
     int outBegIdx;
     int outNBElement;
 
-    double * outFastK = (double *) malloc(m_nSampleLength*sizeof(double));;
-    double * outFastD = (double *) malloc(m_nSampleLength*sizeof(double));;
+    double * outFastK = (double *) malloc(sample->m_nSampleLength*sizeof(double));;
+    double * outFastD = (double *) malloc(sample->m_nSampleLength*sizeof(double));;
 
-    TA_STOCHF(startIdx, endIdx, m_dpSampleHigh, m_dpSampleLow, m_dpSampleClose, optInFastK_Period,
+    TA_STOCHF(startIdx, endIdx, sample->m_dpSampleHigh, sample->m_dpSampleLow, sample->m_dpSampleClose, optInFastK_Period,
               optInFastD_Period, optInFastD_MAType, &outBegIdx, &outNBElement, outFastK, outFastD);
 
     return *(outFastK+outNBElement-1);
@@ -202,9 +205,9 @@ double * Sample::getStochFastKRange() {
     return r;
 }
 
-double Sample::getStochFastD() {
+double Sample::StochFastDHandler::getStochFastD() {
     int startIdx = 0;
-    int endIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100));
+    int endIdx = static_cast<int>(sample->m_nSampleLength*(static_cast<float>(sample->m_nTrainSplit)/100));
 
     int optInFastK_Period = 5;
     int optInFastD_Period = 4;
@@ -214,10 +217,11 @@ double Sample::getStochFastD() {
     int outBegIdx;
     int outNBElement;
 
-    double * outFastK = (double *) malloc(m_nSampleLength*sizeof(double));;
-    double * outFastD = (double *) malloc(m_nSampleLength*sizeof(double));;
+    double * outFastK = (double *) malloc(sample->m_nSampleLength*sizeof(double));;
+    double * outFastD = (double *) malloc(sample->m_nSampleLength*sizeof(double));;
 
-    TA_STOCHF(startIdx, endIdx, m_dpSampleHigh, m_dpSampleLow, m_dpSampleClose, optInFastK_Period,
+    TA_STOCHF(startIdx, endIdx, sample->m_dpSampleHigh, sample->m_dpSampleLow,
+              sample->m_dpSampleClose, optInFastK_Period,
               optInFastD_Period, optInFastD_MAType, &outBegIdx, &outNBElement, outFastK, outFastD);
 
     return *(outFastD+outNBElement-1);
@@ -245,18 +249,18 @@ double * Sample::getStochFastDRange() {
                      double        outReal[] );
  */
 
-double Sample::getWilliamsR() {
+double Sample::WilliamsRHandler::getWilliamsR() {
     int startIdx = 0;
-    int endIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100));
+    int endIdx = static_cast<int>(sample->m_nSampleLength*(static_cast<float>(sample->m_nTrainSplit)/100));
 
     int optInTimePeriod = 14;
 
     int outBegIdx;
     int outNBElement;
 
-    double * outReal = (double *) malloc(m_nSampleLength*sizeof(double));
+    double * outReal = (double *) malloc(sample->m_nSampleLength*sizeof(double));
 
-    TA_WILLR(startIdx, endIdx, m_dpSampleHigh, m_dpSampleLow, m_dpSampleClose,
+    TA_WILLR(startIdx, endIdx, sample->m_dpSampleHigh, sample->m_dpSampleLow, sample->m_dpSampleClose,
              optInTimePeriod, &outBegIdx, &outNBElement, outReal);
 
     return *(outReal+outNBElement-1);
@@ -652,7 +656,7 @@ double * Sample::getAROONUPRange() {
     return r;
 }
 
-double Sample::getAROONDOWN() {
+double Sample::AROONDOWNHandler::getAROONDOWN() {
     int startIdx = 0;
     int endIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100));
 
