@@ -301,7 +301,7 @@ class Sample
         int m_nSampleLength;
         int m_nTrainSplit;
 
-        std::vector<float> m_fvIndicatorValues;
+        std::vector<double> m_fvIndicatorValues;
 
         enum::signal m_eSignal;
 

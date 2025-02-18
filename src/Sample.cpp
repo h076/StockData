@@ -1,5 +1,6 @@
 #include "Sample.hpp"
 #include <climits>
+#include <memory>
 #include <string>
 
 Sample::Sample(double * closeSample, double * highSample, double * lowSample,
@@ -290,9 +291,9 @@ double * Sample::getWilliamsRRange() {
                       double        outReal[] );
  */
 
-double Sample::getUltimateOscillator() {
+double Sample::UltimateOscillatorHandler::getUltimateOscillator() {
     int startIdx = 0;
-    int endIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100));
+    int endIdx = static_cast<int>(sample->m_nSampleLength*(static_cast<float>(sample->m_nTrainSplit)/100));
 
     int optInTimePeriod1 = 7;
     int optInTimePeriod2 = 14;
@@ -301,9 +302,9 @@ double Sample::getUltimateOscillator() {
     int outBegIdx;
     int outNBElement;
 
-    double * outReal = (double *) malloc(m_nSampleLength*sizeof(double));
+    double * outReal = (double *) malloc(sample->m_nSampleLength*sizeof(double));
 
-    TA_ULTOSC(startIdx, endIdx, m_dpSampleHigh, m_dpSampleLow, m_dpSampleClose, optInTimePeriod1,
+    TA_ULTOSC(startIdx, endIdx, sample->m_dpSampleHigh, sample->m_dpSampleLow, sample->m_dpSampleClose, optInTimePeriod1,
               optInTimePeriod2, optInTimePeriod3, &outBegIdx, &outNBElement, outReal);
 
     return *(outReal+outNBElement-1);
@@ -329,18 +330,18 @@ double * Sample::getUltimateOscillatorRange() {
                    double        outReal[] );
  */
 
-double Sample::getTSF() {
+double Sample::TSFHandler::getTSF() {
     int startIdx = 0;
-    int endIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100));
+    int endIdx = static_cast<int>(sample->m_nSampleLength*(static_cast<float>(sample->m_nTrainSplit)/100));
 
     int optInTimePeriod = 14;
 
     int outBegIdx;
     int outNBElement;
 
-    double * outReal = (double *) malloc(m_nSampleLength*sizeof(double));
+    double * outReal = (double *) malloc(sample->m_nSampleLength*sizeof(double));
 
-    TA_TSF(startIdx, endIdx, m_dpSampleClose, optInTimePeriod, &outBegIdx, &outNBElement, outReal);
+    TA_TSF(startIdx, endIdx, sample->m_dpSampleClose, optInTimePeriod, &outBegIdx, &outNBElement, outReal);
 
     return *(outReal+outNBElement-1);
 }
@@ -384,9 +385,9 @@ double * Sample::getTSFRange() {
                     double        outReal[] );
  */
 
-double Sample::getDEMA() {
+double Sample::DEMAHandler::getDEMA() {
     int startIdx = 0;
-    int endIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100));
+    int endIdx = static_cast<int>(sample->m_nSampleLength*(static_cast<float>(sample->m_nTrainSplit)/100));
 
     // should be 50 days may change
     int optInTimePeriod = 10;
@@ -394,9 +395,9 @@ double Sample::getDEMA() {
     int outBegIdx;
     int outNBElement;
 
-    double * outReal = (double *) malloc(m_nSampleLength*sizeof(double));
+    double * outReal = (double *) malloc(sample->m_nSampleLength*sizeof(double));
 
-    TA_DEMA(startIdx, endIdx, m_dpSampleClose, optInTimePeriod, &outBegIdx, &outNBElement, outReal);
+    TA_DEMA(startIdx, endIdx, sample->m_dpSampleClose, optInTimePeriod, &outBegIdx, &outNBElement, outReal);
 
     return *(outReal+outNBElement-1);
 }
@@ -443,18 +444,18 @@ double * Sample::getDEMARange() {
                    double        outReal[] );
  */
 
-double Sample::getCCI() {
+double Sample::CCIHandler::getCCI() {
     int startIdx = 0;
-    int endIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100));
+    int endIdx = static_cast<int>(sample->m_nSampleLength*(static_cast<float>(sample->m_nTrainSplit)/100));
 
     int optInTimePeriod = 5;
 
     int outBegIdx;
     int outNBElement;
 
-    double * outReal = (double *) malloc(m_nSampleLength*sizeof(double));
+    double * outReal = (double *) malloc(sample->m_nSampleLength*sizeof(double));
 
-    TA_CCI(startIdx, endIdx, m_dpSampleHigh, m_dpSampleLow, m_dpSampleClose,
+    TA_CCI(startIdx, endIdx, sample->m_dpSampleHigh, sample->m_dpSampleLow, sample->m_dpSampleClose,
            optInTimePeriod, &outBegIdx, &outNBElement, outReal);
 
     return *(outReal+outNBElement-1);
@@ -504,18 +505,18 @@ double Sample::getVariance() {
                     double        outReal[] );
  */
 
-double Sample::getTRIX() {
+double Sample::TRIXHandler::getTRIX() {
     int startIdx = 0;
-    int endIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100));
+    int endIdx = static_cast<int>(sample->m_nSampleLength*(static_cast<float>(sample->m_nTrainSplit)/100));
 
     int optInTimePeriod = 14;
 
     int outBegIdx;
     int outNBElement;
 
-    double * outReal = (double *) malloc(m_nSampleLength*sizeof(double));
+    double * outReal = (double *) malloc(sample->m_nSampleLength*sizeof(double));
 
-    TA_TRIX(startIdx, endIdx, m_dpSampleClose, optInTimePeriod, &outBegIdx, &outNBElement, outReal);
+    TA_TRIX(startIdx, endIdx, sample->m_dpSampleClose, optInTimePeriod, &outBegIdx, &outNBElement, outReal);
 
     return *(outReal+outNBElement-1);
 }
@@ -553,18 +554,18 @@ TA_RetCode TA_AROONOSC( int    startIdx,
                         double        outReal[] );
 */
 
-double Sample::getAROON() {
+double Sample::AROONHandler::getAROON() {
     int startIdx = 0;
-    int endIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100));
+    int endIdx = static_cast<int>(sample->m_nSampleLength*(static_cast<float>(sample->m_nTrainSplit)/100));
 
     int optInTimePeriod = 25;
 
     int outBegIdx;
     int outNBElement;
 
-    double * outReal = (double *) malloc(m_nSampleLength*sizeof(double));
+    double * outReal = (double *) malloc(sample->m_nSampleLength*sizeof(double));
 
-    TA_AROONOSC(startIdx, endIdx, m_dpSampleHigh, m_dpSampleLow, optInTimePeriod,
+    TA_AROONOSC(startIdx, endIdx, sample->m_dpSampleHigh, sample->m_dpSampleLow, optInTimePeriod,
                 &outBegIdx, &outNBElement, outReal);
 
     return *(outReal+outNBElement-1);
@@ -603,19 +604,19 @@ TA_RetCode TA_AROON( int    startIdx,
                      double        outAroonDown[],
                      double        outAroonUp[] );*/
 
-double Sample::getAROONUP() {
+double Sample::AROONUPHandler::getAROONUP() {
     int startIdx = 0;
-    int endIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100));
+    int endIdx = static_cast<int>(sample->m_nSampleLength*(static_cast<float>(sample->m_nTrainSplit)/100));
 
     int optInTimePeriod = 25;
 
     int outBegIdx;
     int outNBElement;
 
-    double * outAroonDown = (double *) malloc(sizeof(double)*m_nSampleLength);
-    double * outAroonUp = (double *) malloc(sizeof(double)*m_nSampleLength);
+    double * outAroonDown = (double *) malloc(sizeof(double)*sample->m_nSampleLength);
+    double * outAroonUp = (double *) malloc(sizeof(double)*sample->m_nSampleLength);
 
-    TA_AROON(startIdx, endIdx, m_dpSampleHigh, m_dpSampleLow, optInTimePeriod, &outBegIdx,
+    TA_AROON(startIdx, endIdx, sample->m_dpSampleHigh, sample->m_dpSampleLow, optInTimePeriod, &outBegIdx,
              &outNBElement, outAroonDown, outAroonUp);
 
     free(outAroonDown);
@@ -658,17 +659,17 @@ double * Sample::getAROONUPRange() {
 
 double Sample::AROONDOWNHandler::getAROONDOWN() {
     int startIdx = 0;
-    int endIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100));
+    int endIdx = static_cast<int>(sample->m_nSampleLength*(static_cast<float>(sample->m_nTrainSplit)/100));
 
     int optInTimePeriod = 25;
 
     int outBegIdx;
     int outNBElement;
 
-    double * outAroonDown = (double *) malloc(sizeof(double)*m_nSampleLength);
-    double * outAroonUp = (double *) malloc(sizeof(double)*m_nSampleLength);
+    double * outAroonDown = (double *) malloc(sizeof(double)*sample->m_nSampleLength);
+    double * outAroonUp = (double *) malloc(sizeof(double)*sample->m_nSampleLength);
 
-    TA_AROON(startIdx, endIdx, m_dpSampleHigh, m_dpSampleLow, optInTimePeriod, &outBegIdx,
+    TA_AROON(startIdx, endIdx, sample->m_dpSampleHigh, sample->m_dpSampleLow, optInTimePeriod, &outBegIdx,
              &outNBElement, outAroonDown, outAroonUp);
 
     free(outAroonUp);
@@ -709,10 +710,10 @@ double * Sample::getAROONDOWNRange() {
     return r;
 }
 
-double Sample::getSampleY() {
-    int startIdx = static_cast<int>(m_nSampleLength*(static_cast<float>(m_nTrainSplit)/100))+1;
-    double startCloseValue = *(m_dpSampleClose+startIdx);
-    double endCloseValue = *(m_dpSampleClose+m_nSampleLength-1);
+double Sample::SampleYHandler::getSampleY() {
+    int startIdx = static_cast<int>(sample->m_nSampleLength*(static_cast<float>(sample->m_nTrainSplit)/100))+1;
+    double startCloseValue = *(sample->m_dpSampleClose+startIdx);
+    double endCloseValue = *(sample->m_dpSampleClose+sample->m_nSampleLength-1);
 
     return ((endCloseValue - startCloseValue) * 100) / startCloseValue;
 }
@@ -727,6 +728,40 @@ double * Sample::getYRange() {
     return r;
 }
 
+// set all sample indicator values using the chain of responsibility pattern
+void Sample::setIndicatorValues() {
+    auto rsi = std::make_shared<RSIHandler>(*this);
+    auto macd = std::make_shared<MACDHandler>(*this);
+    auto macdSignal = std::make_shared<MACDSignalHandler>(*this);
+    auto close = std::make_shared<CloseHandler>(*this);
+    auto sfk = std::make_shared<StochFastKHandler>(*this);
+    auto sfd = std::make_shared<StochFastDHandler>(*this);
+    auto aroon = std::make_shared<AROONHandler>(*this);
+    auto aroonUp = std::make_shared<AROONUPHandler>(*this);
+    auto aroonDown = std::make_shared<AROONDOWNHandler>(*this);
+    auto williamsR = std::make_shared<WilliamsRHandler>(*this);
+    auto ultimateOsc = std::make_shared<UltimateOscillatorHandler>(*this);
+    auto tsf = std::make_shared<TSFHandler>(*this);
+    auto cci = std::make_shared<CCIHandler>(*this);
+    auto y = std::make_shared<SampleYHandler>(*this);
+
+    rsi->setNext(macd);
+    macd->setNext(macdSignal);
+    macdSignal->setNext(close);
+    close->setNext(sfk);
+    sfk->setNext(sfd);
+    sfd->setNext(aroon);
+    aroon->setNext(aroonUp);
+    aroonUp->setNext(aroonDown);
+    aroonDown->setNext(williamsR);
+    williamsR->setNext(ultimateOsc);
+    ultimateOsc->setNext(tsf);
+    tsf->setNext(cci);
+    cci->setNext(y);
+
+    rsi->handle(m_fvIndicatorValues);
+}
+
 double Sample::minInRange(double * r) {
     double min = *r;
     free(r);
@@ -739,6 +774,7 @@ double Sample::maxInRange(double * r) {
     return max;
 }
 
+/*
 std::string Sample::toCSVLine() {
     return  std::to_string(getRSI()) + "," + std::to_string(getMACD())
         + "," + std::to_string(getMACDSignal()) + "," + std::to_string(getClose())
@@ -749,6 +785,7 @@ std::string Sample::toCSVLine() {
         + "," + getSignalAsString() + "\n";
 
 }
+*/
 
 std::string Sample::minRangeToCSV() {
     return std::to_string(minInRange(getRSIRange())) + "," + std::to_string(minInRange(getMACDRange()))
@@ -770,7 +807,7 @@ std::string Sample::maxRangeToCSV() {
 
 const std::string Sample::toCSVHeader() {
     return "RSI,MACD,MACD Signal,Close,Stochastic Fast K, \
-           Stochastic Fast D,AROON Osc,Williams %R,Ultimate Oscilator,TSF,CCI,Y,Signal\n";
+           Stochastic Fast D,AROON Osc,AROON up,AROON down,Williams %R,Ultimate Oscilator,TSF,CCI,Y,Signal\n";
 }
 
 // depends on the given range of y
