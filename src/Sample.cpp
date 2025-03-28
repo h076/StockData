@@ -2,6 +2,7 @@
 #include <climits>
 #include <memory>
 #include <string>
+#include <spdlog/spdlog.h>
 
 Sample::Sample(double * closeSample, double * highSample, double * lowSample,
                int sampleLength, int trainSplit = 70) {
@@ -17,6 +18,7 @@ Sample::Sample(double * closeSample, double * highSample, double * lowSample,
     m_nTrainSplit = trainSplit;
 
     //m_eSignal = yToSignal(getSampleY());
+    setIndicatorValues();
 }
 
 Sample::~Sample() {
@@ -730,20 +732,20 @@ double * Sample::getYRange() {
 
 // set all sample indicator values using the chain of responsibility pattern
 void Sample::setIndicatorValues() {
-    auto rsi = std::make_shared<RSIHandler>(*this);
-    auto macd = std::make_shared<MACDHandler>(*this);
-    auto macdSignal = std::make_shared<MACDSignalHandler>(*this);
-    auto close = std::make_shared<CloseHandler>(*this);
-    auto sfk = std::make_shared<StochFastKHandler>(*this);
-    auto sfd = std::make_shared<StochFastDHandler>(*this);
-    auto aroon = std::make_shared<AROONHandler>(*this);
-    auto aroonUp = std::make_shared<AROONUPHandler>(*this);
-    auto aroonDown = std::make_shared<AROONDOWNHandler>(*this);
-    auto williamsR = std::make_shared<WilliamsRHandler>(*this);
-    auto ultimateOsc = std::make_shared<UltimateOscillatorHandler>(*this);
-    auto tsf = std::make_shared<TSFHandler>(*this);
-    auto cci = std::make_shared<CCIHandler>(*this);
-    auto y = std::make_shared<SampleYHandler>(*this);
+    auto rsi = std::make_shared<RSIHandler>(this);
+    auto macd = std::make_shared<MACDHandler>(this);
+    auto macdSignal = std::make_shared<MACDSignalHandler>(this);
+    auto close = std::make_shared<CloseHandler>(this);
+    auto sfk = std::make_shared<StochFastKHandler>(this);
+    auto sfd = std::make_shared<StochFastDHandler>(this);
+    auto aroon = std::make_shared<AROONHandler>(this);
+    auto aroonUp = std::make_shared<AROONUPHandler>(this);
+    auto aroonDown = std::make_shared<AROONDOWNHandler>(this);
+    auto williamsR = std::make_shared<WilliamsRHandler>(this);
+    auto ultimateOsc = std::make_shared<UltimateOscillatorHandler>(this);
+    auto tsf = std::make_shared<TSFHandler>(this);
+    auto cci = std::make_shared<CCIHandler>(this);
+    auto y = std::make_shared<SampleYHandler>(this);
 
     rsi->setNext(macd);
     macd->setNext(macdSignal);
@@ -759,7 +761,7 @@ void Sample::setIndicatorValues() {
     tsf->setNext(cci);
     cci->setNext(y);
 
-    rsi->handle(m_fvIndicatorValues);
+    rsi->handle(m_vdIndicatorValues);
 }
 
 double Sample::minInRange(double * r) {
@@ -777,15 +779,30 @@ double Sample::maxInRange(double * r) {
 /*
 std::string Sample::toCSVLine() {
     return  std::to_string(getRSI()) + "," + std::to_string(getMACD())
-        + "," + std::to_string(getMACDSignal()) + "," + std::to_string(getClose())
-        + "," + std::to_string(getStochFastK()) + "," + std::to_string(getStochFastD())
-        + "," + std::to_string(getAROON()) + "," + std::to_string(getWilliamsR())
-        + "," + std::to_string(getUltimateOscillator()) + "," + std::to_string(getTSF())
+        + "," + std::to_string(getMACDSignal()) + "," +
+std::to_string(getClose())
+        + "," + std::to_string(getStochFastK()) + "," +
+std::to_string(getStochFastD())
+        + "," + std::to_string(getAROON()) + "," +
+std::to_string(getWilliamsR())
+        + "," + std::to_string(getUltimateOscillator()) + "," +
+std::to_string(getTSF())
         + "," + std::to_string(getCCI()) + "," + std::to_string(getSampleY())
         + "," + getSignalAsString() + "\n";
 
 }
 */
+
+std::string Sample::toCSVLine() {
+    std::string line = "";
+
+    for(double v : m_vdIndicatorValues)
+        line += std::to_string(v) + ",";
+
+    line += getSignalAsString() + "\n";
+
+    return line;
+}
 
 std::string Sample::minRangeToCSV() {
     return std::to_string(minInRange(getRSIRange())) + "," + std::to_string(minInRange(getMACDRange()))
@@ -830,6 +847,22 @@ enum::signal Sample::yToSignal(double y) {
     }
 }
 
+void Sample::setLabel(double yMin, double yMax) {
+    double y = *(m_vdIndicatorValues.end()-1);
+
+    if (y > 1.0) {
+        m_eSignal = STRONG_BUY;
+    }else if (y >= 0.5) {
+        m_eSignal = BUY;
+    }else if (y > -0.5) {
+        m_eSignal = HOLD;
+    }else if (y >= -1.0) {
+        m_eSignal = SELL;
+    }else {
+        m_eSignal = STRONG_SELL;
+    }
+}
+
 std::string Sample::getSignalAsString() {
     switch(m_eSignal) {
         case STRONG_BUY:
@@ -843,4 +876,13 @@ std::string Sample::getSignalAsString() {
         case STRONG_SELL:
             return "strong sell";
     }
+}
+
+double Sample::getIndicatorValue(int idx) {
+    if(idx > m_vdIndicatorValues.size()-1 || idx < 0) {
+        spdlog::error("Sample::getIndicatorValue : invalid indicator index.");
+        return 0.0;
+    }
+
+    return m_vdIndicatorValues[idx];
 }

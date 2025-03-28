@@ -3,16 +3,15 @@
 
 int main() {
 
-    Ticker * apple = new Ticker("AAPL");
+    Ticker * apple = new Ticker("TSLA");
 
-    int sampleCount = 100;
+    int sampleCount = 800;
     int sampleLength = 120;
     apple->setMultiplier(30);
-    //apple->getPriceSamples("2023-01-01", "2023-04-01", MINUTE, sampleCount, sampleLength);
+    apple->getPriceSamples("2023-01-01", "2023-11-01", MINUTE, sampleCount, sampleLength);
     //apple->displaySamples();
     //apple->displaySamplesFeatures();
-    //apple->saveSamplesCSV();
-    apple->test_addSampleRanges();
+    apple->saveSamplesCSV();
     delete apple;
 
     return 0;

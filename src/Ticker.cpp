@@ -360,7 +360,7 @@ void Ticker::displaySamplesFeatures() {
         std::cout << "no samples to display features of ...\n";
         return;
     }
-
+/*
     int i=1;
     for(auto & s : m_oSamples) {
         std::cout << "Sample " << i++ << " Features ... \n";
@@ -376,7 +376,7 @@ void Ticker::displaySamplesFeatures() {
         std::cout << "Commodity channel index = " << s->getCCI() << ", ";
         std::cout << "One day ROC triple smooth EMA = " << s->getTRIX();
         std::cout << std::endl;
-    }
+    }*/
 }
 
 void Ticker::saveSamplesCSV() {
@@ -385,15 +385,18 @@ void Ticker::saveSamplesCSV() {
         return;
     }
 
+    setRanges();
+    setSampleLabels();
+
     std::ofstream file;
     file.open("Samples.csv");
     file << m_oSamples[0]->toCSVHeader();
-    file << m_oSamples[0]->minRangeToCSV();
-    file << m_oSamples[0]->maxRangeToCSV();
+    file << getMinRangeCSV();
+    file << getMaxRangeCSV();
     for(auto & s : m_oSamples) {
         file << s->toCSVLine();
     }
-    //TickerUtil::addSampleRanges();
+
     file.close();
     return;
 }
@@ -420,6 +423,77 @@ bool Ticker::saveSamplesTo(std::ofstream& file) {
     }
 
     return true;
+}
+
+void Ticker::setRanges() {
+    if(m_oSamples.empty()) {
+        spdlog::error("Ticker::setRanges : No samples present, cannot set ranges.");
+        return;
+    }
+
+    int numIndicators = m_oSamples[0]->getNumberOfIndicators();
+
+    m_vdMinRanges.clear();
+    m_vdMinRanges.resize(numIndicators);
+    std::fill(m_vdMinRanges.begin(), m_vdMinRanges.end(), DBL_MAX);
+
+    m_vdMaxRanges.clear();
+    m_vdMaxRanges.resize(numIndicators);
+    std::fill(m_vdMaxRanges.begin(), m_vdMaxRanges.end(), -DBL_MAX);
+
+    double iv;
+
+    for(Sample * s : m_oSamples) {
+        for(int i=0; i<numIndicators; i++) {
+            iv = s->getIndicatorValue(i);
+            m_vdMinRanges[i] = std::min(m_vdMinRanges[i], iv);
+            m_vdMaxRanges[i] = std::max(m_vdMaxRanges[i], iv);
+        }
+    }
+
+    // balance y range
+    double yMin = m_vdMinRanges[numIndicators-1];
+    double yMax = m_vdMaxRanges[numIndicators-1];
+    if(abs(yMin) > yMax) {
+        m_vdMinRanges[numIndicators-1] = static_cast<double>(floor(yMin));
+        m_vdMaxRanges[numIndicators-1] = static_cast<double>(abs(floor(yMin)));
+    }else {
+        m_vdMaxRanges[numIndicators-1] = static_cast<double>(ceil(yMax));
+        m_vdMinRanges[numIndicators-1] = static_cast<double>(-(ceil(yMax)));
+    }
+}
+
+void Ticker::setSampleLabels() {
+    if(m_oSamples.empty()) {
+        spdlog::error("Ticker::setSampleLabels : No samples present, cannot set labels.");
+        return;
+    }
+
+    double yMin = *(m_vdMinRanges.end()-1);
+    double yMax = *(m_vdMaxRanges.end()-1);
+    for(Sample * s : m_oSamples) {
+        s->setLabel(yMin, yMax);
+    }
+}
+
+std::string Ticker::getMinRangeCSV() {
+    std::string line = "";
+    for(double v : m_vdMinRanges)
+        line += std::to_string(v) + ",";
+
+    line.pop_back();
+    line += "\n";
+    return line;
+}
+
+std::string Ticker::getMaxRangeCSV() {
+    std::string line = "";
+    for(double v : m_vdMaxRanges)
+        line += std::to_string(v) + ",";
+
+    line.pop_back();
+    line += "\n";
+    return line;
 }
 
 void Ticker::test_addSampleRanges() {

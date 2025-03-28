@@ -292,7 +292,11 @@ class Sample
         const std::string toCSVHeader();
 
         enum::signal yToSignal(double y);
+        void setLabel(double yMin, double yMax);
         std::string getSignalAsString();
+
+        int getNumberOfIndicators() {return m_vdIndicatorValues.size();}
+        double getIndicatorValue(int idx);
 
     private:
         double * m_dpSampleClose;
@@ -301,7 +305,7 @@ class Sample
         int m_nSampleLength;
         int m_nTrainSplit;
 
-        std::vector<double> m_fvIndicatorValues;
+        std::vector<double> m_vdIndicatorValues;
 
         enum::signal m_eSignal;
 

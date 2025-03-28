@@ -53,6 +53,9 @@ class Ticker
         void setRanges();
         void setSampleLabels();
 
+        std::string getMinRangeCSV();
+        std::string getMaxRangeCSV();
+
         void test_addSampleRanges();
 
         class TickerException : public std::runtime_error {
@@ -70,8 +73,8 @@ class Ticker
         int m_nMultiplier;
         float m_fSampleMinYRange;
         float m_fSampleMaxYRange;
-        std::vector<float> m_vfMinRanges;
-        std::vector<float> m_vfMaxRanges;
+        std::vector<double> m_vdMinRanges;
+        std::vector<double> m_vdMaxRanges;
 };
 
 namespace TickerUtil {
