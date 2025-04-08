@@ -75,16 +75,17 @@ void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to, bool recursiv
             std::this_thread::sleep_for(std::chrono::minutes(1));
             if(m_oSpots.empty()) {
                 loadHistoricalSpots(from, to, true);
-                spdlog::info("Loaded historical spots from {0} to {1}", ctime (&from), ctime (&to));
                 return;
             }
 
             std::time_t last_date = m_oSpots.back()->getEpochDate();
+            std::cout << "to:" << std::to_string(to) << std::endl;
+            std::cout << "last:" << std::to_string(last_date) << std::endl;
+
             if(timeUtils::preceedDate(last_date, to, m_sInterval, getMultiplier())) {
                 loadHistoricalSpots(last_date, to, true);
                 m_oSpots.pop_back(); // prevent double load of last spot
                                      //
-                spdlog::info("Loaded historical spots from {0} to {1}", ctime (&from), ctime (&to));
             }
         }
         return;
@@ -99,10 +100,10 @@ void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to, bool recursiv
     char timeBuffer[14];
     std::time_t time;
 
-    char openBuffer[10];
-    char closeBuffer[10];
-    char highBuffer[10];
-    char lowBuffer[10];
+    char openBuffer[32];
+    char closeBuffer[32];
+    char highBuffer[32];
+    char lowBuffer[32];
 
     int valueSize = 0;
     for(char currentChar; memPtr != endPtr; memPtr++) {
@@ -153,14 +154,14 @@ void Ticker::loadHistoricalSpots(std::time_t from, std::time_t to, bool recursiv
     // Add check that the time of the last given spot is not before the 'to' date
     std::time_t last_date = m_oSpots.back()->getEpochDate();
     if(timeUtils::preceedDate(last_date, to, m_sInterval, getMultiplier())) {
-        loadHistoricalSpots(last_date, to, true);
         m_oSpots.pop_back(); // prevent double load of last spot
+        loadHistoricalSpots(last_date, to, true);
     }
 
     //displaySpots();
     //std::cout << "number of spots : " << m_oSpots.size() << std::endl;
 
-    spdlog::info("Loaded historical spots from {0} to {1}", ctime (&from), ctime (&to));
+    spdlog::info("Loaded historical spots from {0} to {1}", std::to_string(from), std::to_string(to));
 }
 
 void Ticker::setInterval(Interval interval) {
@@ -379,6 +380,15 @@ void Ticker::displaySamplesFeatures() {
     }*/
 }
 
+std::string Ticker::getSampleCSVHeader() {
+    if(m_oSamples.empty()) {
+        spdlog::error("Ticker::getSampleCSVHeader : no samples present, cannot return header.");
+        return "";
+    }
+    return m_oSamples[0]->toCSVHeader();
+}
+
+// used in example
 void Ticker::saveSamplesCSV() {
     if(m_oSamples.empty()) {
         spdlog::error("Ticker::saveSamplesCSV : No samples present, cannot save to csv.");
@@ -407,20 +417,26 @@ bool Ticker::saveSamplesTo(std::ofstream& file) {
         return false;
     }
 
+    setRanges();
+    setSampleLabels();
+
     if(!file.is_open()) {
         file.open("Samples.csv");
         file << m_oSamples[0]->toCSVHeader();
-        file << m_oSamples[0]->minRangeToCSV();
-        file << m_oSamples[0]->maxRangeToCSV();
+        file << getMinRangeCSV();
+        file << getMaxRangeCSV();
     }
 
     if(file.is_open()) {
         for(auto & s : m_oSamples) {
+
             file << s->toCSVLine();
         }
     }else {
         spdlog::error("Ticker::saveSamplesTo : File not opened, nothing saved");
     }
+
+    spdlog::info("Ticker::saveSamplesTo : Success.");
 
     return true;
 }
@@ -477,6 +493,10 @@ void Ticker::setSampleLabels() {
 }
 
 std::string Ticker::getMinRangeCSV() {
+    if(m_vdMinRanges.empty()) {
+        spdlog::error("Ticker::getMinRangeCSV : no ranges ...");
+        return "";
+    }
     std::string line = "";
     for(double v : m_vdMinRanges)
         line += std::to_string(v) + ",";
@@ -494,6 +514,44 @@ std::string Ticker::getMaxRangeCSV() {
     line.pop_back();
     line += "\n";
     return line;
+}
+
+double Ticker::getMinRange(int idx) {
+    if(m_oSamples.empty()) {
+        spdlog::error("Ticker::getMinRange : Cannot get min range.");
+        return 0.0;
+    }
+
+    int numIndicators = m_oSamples[0]->getNumberOfIndicators();
+    if(idx < 0 || idx >= numIndicators) {
+        spdlog::error("Ticker::getMinRange : Cannot get min range, invalid index");
+        return 0.0;
+    }
+
+    return m_vdMinRanges[idx];
+}
+
+double Ticker::getMaxRange(int idx) {
+    if(m_oSamples.empty()) {
+        spdlog::error("Ticker::getMaxRange : Cannot get max range.");
+        return 0.0;
+    }
+
+    int numIndicators = m_oSamples[0]->getNumberOfIndicators();
+    if(idx < 0 || idx >= numIndicators) {
+        spdlog::error("Ticker::getMaxRange : Cannot get max range, invalid index");
+        return 0.0;
+    }
+
+    return m_vdMaxRanges[idx];
+}
+
+int Ticker::getNumIndicators() {
+    if(m_oSamples.empty()) {
+        spdlog::error("Ticker::getNumIndicators : Cannot get num indicators.");
+        return 0;
+    }
+    return m_oSamples[0]->getNumberOfIndicators();
 }
 
 void Ticker::test_addSampleRanges() {

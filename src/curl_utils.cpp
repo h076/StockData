@@ -82,5 +82,7 @@ Storage * downloadHistoricalData(std::string symbol,
 
     spdlog::info("CuRL : recieved a chunck of size {}", chunk->size);
 
+    //std::cout << chunk->memory << std::endl;
+
     return chunk;
 }

@@ -737,13 +737,13 @@ void Sample::setIndicatorValues() {
     auto macdSignal = std::make_shared<MACDSignalHandler>(this);
     auto close = std::make_shared<CloseHandler>(this);
     auto sfk = std::make_shared<StochFastKHandler>(this);
-    auto sfd = std::make_shared<StochFastDHandler>(this);
+    //auto sfd = std::make_shared<StochFastDHandler>(this);
     auto aroon = std::make_shared<AROONHandler>(this);
-    auto aroonUp = std::make_shared<AROONUPHandler>(this);
-    auto aroonDown = std::make_shared<AROONDOWNHandler>(this);
+    //auto aroonUp = std::make_shared<AROONUPHandler>(this);
+    //auto aroonDown = std::make_shared<AROONDOWNHandler>(this);
     auto williamsR = std::make_shared<WilliamsRHandler>(this);
     auto ultimateOsc = std::make_shared<UltimateOscillatorHandler>(this);
-    auto tsf = std::make_shared<TSFHandler>(this);
+    //auto tsf = std::make_shared<TSFHandler>(this);
     auto cci = std::make_shared<CCIHandler>(this);
     auto y = std::make_shared<SampleYHandler>(this);
 
@@ -751,15 +751,15 @@ void Sample::setIndicatorValues() {
     macd->setNext(macdSignal);
     macdSignal->setNext(close);
     close->setNext(sfk);
-    sfk->setNext(sfd);
-    sfd->setNext(aroon);
-    aroon->setNext(aroonUp);
-    aroonUp->setNext(aroonDown);
-    aroonDown->setNext(williamsR);
-    williamsR->setNext(ultimateOsc);
-    ultimateOsc->setNext(tsf);
-    tsf->setNext(cci);
-    cci->setNext(y);
+    sfk->setNext(aroon);
+    //sfd->setNext(aroon);
+    aroon->setNext(williamsR);
+    //aroonUp->setNext(aroonDown);
+    //aroonDown->setNext(williamsR);
+    williamsR->setNext(y);
+    //ultimateOsc->setNext(cci);
+    //tsf->setNext(cci);
+    //cci->setNext(y);
 
     rsi->handle(m_vdIndicatorValues);
 }
@@ -823,8 +823,7 @@ std::string Sample::maxRangeToCSV() {
 }
 
 const std::string Sample::toCSVHeader() {
-    return "RSI,MACD,MACD Signal,Close,Stochastic Fast K, \
-           Stochastic Fast D,AROON Osc,AROON up,AROON down,Williams %R,Ultimate Oscilator,TSF,CCI,Y,Signal\n";
+    return "RSI,MACD,MACD Signal,Close,Stochastic Fast K,AROON Osc,Williams %R,Y,Signal\n";
 }
 
 // depends on the given range of y
@@ -850,13 +849,13 @@ enum::signal Sample::yToSignal(double y) {
 void Sample::setLabel(double yMin, double yMax) {
     double y = *(m_vdIndicatorValues.end()-1);
 
-    if (y > 1.0) {
+    if (y > 2.0) {
         m_eSignal = STRONG_BUY;
     }else if (y >= 0.5) {
         m_eSignal = BUY;
     }else if (y > -0.5) {
         m_eSignal = HOLD;
-    }else if (y >= -1.0) {
+    }else if (y >= -2.0) {
         m_eSignal = SELL;
     }else {
         m_eSignal = STRONG_SELL;

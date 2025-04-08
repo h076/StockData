@@ -7,7 +7,7 @@
 #include <string>
 #include <unordered_set>
 #include <thread>
-
+#include "Sample.hpp"
 int main() {
     std::ifstream tickTxt ("SP500Tickers.txt");
     std::string line;
@@ -37,7 +37,7 @@ int main() {
 
     srand(time(NULL));
 
-    for(int i=0; i<75; i++) {
+    for(int i=0; i<20; i++) {
         if (requests > 0 && requests % 5 == 0) // then we wait 1 minute as polygon only allows 5 requests a minute
             std::this_thread::sleep_for(std::chrono::minutes(1));
 
@@ -48,7 +48,7 @@ int main() {
 
         t = new Ticker(tickStr[strIdx]);
         t->setMultiplier(30);
-        t->getPriceSamples("2024-01-21", "2024-11-21", MINUTE, 4, 160);
+        t->getPriceSamples("2023-04-01", "2023-07-07", MINUTE, 40, 60, 85);
         requests++;
 
         // if false the no samples have been loaded

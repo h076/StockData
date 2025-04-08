@@ -50,11 +50,18 @@ class Ticker
         void saveSamplesCSV();
         bool saveSamplesTo(std::ofstream& file);
 
+        std::string getSampleCSVHeader();
+
         void setRanges();
         void setSampleLabels();
 
         std::string getMinRangeCSV();
         std::string getMaxRangeCSV();
+
+        int getNumIndicators();
+
+        double getMinRange(int idx);
+        double getMaxRange(int idx);
 
         void test_addSampleRanges();
 

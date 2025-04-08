@@ -64,6 +64,12 @@ bool timeUtils::preceedDate(const std::time_t check, const std::time_t against, 
     std::time_t newTime = mktime(time);
     double diff = difftime(against, newTime);
 
+    std::cout << "dif : " << diff << std::endl;
+    std::cout << "partial : " << partial << std::endl;
+
+    if(diff == 10800 || diff == 12600 || diff == partial)
+        return false;
+
     if(diff > partial || diff > 0)
         return true;
     return false;
